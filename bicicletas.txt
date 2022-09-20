@@ -1,0 +1,4 @@
+identificador,tipo,parqueo
+b001,electrica,a1
+b0d1,electrica,aw
+3001,electrica,sdf
