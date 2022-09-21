@@ -16,14 +16,20 @@ getTarKmEle(Empresa _ _ _ _ electrico) = electrico;
 
 
 ---parqueos
-type NombreParqueo = String
-type DireccionParqueo = String
-type ProvinciaParqueo = String
-type UbicacionX = Integer
-type UbicacionY = Integer
-data Parqueo = Parqueo NombreParqueo DireccionParqueo ProvinciaParqueo UbicacionX UbicacionY;
+--type NombreParqueo = String
+--type DireccionParqueo = String
+--type ProvinciaParqueo = String
+--type UbicacionX = Float
+--type UbicacionY = Float
+data Parqueo = Parqueo {
+    nombreParqueo ::String,
+    direccionParqueo :: String,
+    provinciaParqueo ::String,
+    ubicacionX:: Float,
+    ubicacionY :: Float
+} deriving(Eq);
 
-crearParqueo(elemento) = Parqueo (elemento!!0) (elemento!!1) (elemento!!2) (read(elemento!!3) :: Integer) (read(elemento!!4) :: Integer)
+crearParqueo(elemento) = Parqueo (elemento!!0) (elemento!!1) (elemento!!2) (read(elemento!!3) :: Float) (read(elemento!!4) :: Float)
 getNombreParqueo (Parqueo nombre _ _ _ _) = nombre;
 getDireccionParqueo (Parqueo _ direccion _ _ _) = direccion;
 getProvinciaParqueo (Parqueo _ _ provincia _ _) = provincia;
@@ -61,7 +67,7 @@ menuPrincipal (opcion, lParqueos, lBicicletas) =
             case opcion of
                 -1-> putStr("")
                 1-> menuOperativo (-1,lParqueos, lBicicletas)
-                2-> menuAdministrativo (-1)
+                2-> menuGeneral (-1,lParqueos)
 
             putStrLn("\n\nMenú principal")
             print("1.Opciones operativas")
@@ -97,28 +103,75 @@ menuOperativo (opcion, lParqueos, lBicicletas) =
             menuOperativo(opcion, lParqueos, lBicicletas)
 
 
-menuAdministrativo (opcion) =
+menuGeneral (opcion, lParqueos) =
     if opcion == 4 then
         print ("volviendo")
     else
         do
             case opcion of
                 -1-> putStrLn ("")
-                1-> putStrLn("1. Consultar bicicletas")
+                1-> do
+                    putStrLn("1. Consultar bicicletas")
+                    consultarBicicletas lParqueos
                 2-> putStrLn("2. Alquilar")
                 3-> putStrLn("3. Facturar")
 
             putStrLn("\nMenú operativo")
-            putStrLn("\nConsultar bicicletas")
-            putStrLn("\nAlquilar")
-            putStrLn("\nFacturar")
-            putStrLn("\nVolver")
+            putStrLn("1.Consultar bicicletas")
+            putStrLn("2.Alquilar")
+            putStrLn("3.Facturar")
+            putStrLn("4.Volver")
             putStrLn "Indique la opción: "
             tempOpcion <- getLine
             let opcion = (read tempOpcion :: Integer)
-            menuAdministrativo(opcion)
+            menuGeneral(opcion, lParqueos)
+-----------------------------------------------------------
+--------------------------------------------------------
+
+consultarBicicletas lParqueos = do
+    putStrLn "Indique x: "
+    pX<- getLine
+    putStrLn "Indique y: "
+    pY<- getLine
+    getParqueoCercano (read (pX) ::Float, read (pY) ::Float, lParqueos, (head lParqueos))
 
 
+--getParqueoCercano :: (Integer, Integer, [Parqueo]) -> Parqueo
+
+getParqueoCercano (x1, y1, lParqueos,cercano) = do
+    if lParqueos == [] then do
+        let 
+            nombre =  getNombreParqueo(cercano)
+            direccion = getDireccionParqueo(cercano)
+            provincia = getProvinciaParqueo(cercano)
+            x = getUbicacionX(cercano)
+            y = getUbicacionY(cercano)
+        putStrLn ("\n\n--------------------------------\
+                    \ \nEl parqueo más cercano es: \
+                    \ \n\nParqueo: " ++ show nombre ++ "\
+                    \ \nDireccion: " ++ show direccion ++ "\
+                    \ \nProvincia: " ++ show provincia ++ "\
+                    \ \nX: " ++ show x ++ "\
+                    \ \nY: " ++ show y ++ "\
+                    \ \n-----------------------------------")
+    else
+        do
+        let par = head lParqueos
+        print (calcularDistanciaParqueo(x1,y1,par))
+        if calcularDistanciaParqueo(x1,y1,par)<= calcularDistanciaParqueo(x1,y1,cercano) then
+            getParqueoCercano(x1,y1,(tail lParqueos),par)
+        else
+            getParqueoCercano(x1,y1,(tail lParqueos),cercano)
+
+
+calcularDistanciaParqueo(x1,y1, parqueo) =do 
+    let x2 = getUbicacionX(parqueo)
+    let y2 = getUbicacionY(parqueo)
+    calcularDistancia(x1,x2,y1,y2)
+
+calcularDistancia(x1,x2,y1,y2) = 
+
+    sqrt((x2-x1)**2 + (y2-y1)**2)
 ------------------------------------------------
 
 -----------------------------------------------
