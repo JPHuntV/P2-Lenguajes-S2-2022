@@ -1,10 +1,19 @@
+import Data.Char
+
+
 ---información de la empresa
-type NombreEmpresa =  String
-type SitioWeb = String
-type Contacto = Integer
-type TarifaKmPedal = Float
-type TarifaKmElectrico = Float
-data Empresa = Empresa NombreEmpresa SitioWeb Contacto TarifaKmPedal TarifaKmElectrico;
+--type NombreEmpresa =  String
+--type SitioWeb = String
+--type Contacto = Integer
+--type TarifaKmPedal = Float
+--type TarifaKmElectrico = Float
+data Empresa = Empresa {
+    nombreEmpresa::String,
+    sitioWeb::String,
+    contacto::Integer,
+    tarifaKmPedal::Float,
+    tarifaKmElectrico::Float
+}deriving(Eq);
 
 
 getNombreEmpresa(Empresa nombre _ _ _ _) = nombre;
@@ -38,10 +47,14 @@ getUbicacionY (Parqueo _ _ _ _ y) = y;
 
 ------------------------------------------------------------------------------------------
 --bicicletas
-type IdentificadorBicicleta = String
-type TipoBicicleta = String
-type ParqueoBicicleta = String
-data Bicicleta = Bicicleta IdentificadorBicicleta TipoBicicleta ParqueoBicicleta;
+--type IdentificadorBicicleta = String
+--type TipoBicicleta = String
+--type ParqueoBicicleta = String
+data Bicicleta = Bicicleta {
+    identificadorBicicleta::String,
+    tipoBicicleta::String,
+    parqueoBicicleta::String
+}deriving(Eq);
 
 crearBicicleta(elemento) = Bicicleta (elemento!!0) (elemento!!1) (elemento!!2)
 getIdBicicleta (Bicicleta id _ _) = id;
@@ -59,15 +72,15 @@ getCedulaUsuario(Usuario ced _) = ced;
 getNombreUsuario (Usuario _ nombre) = nombre;
 -------------------------------------------------------------------------------------
 --menuPrincipal :: Integer -> [Parqueo] -> IO()
-menuPrincipal (opcion, lParqueos, lBicicletas) =
+menuPrincipal (opcion, lParqueos, lBicicletas, lUsuarios) =
     if opcion == 3 then
         print ("salir")
     else
         do
             case opcion of
                 -1-> putStr("")
-                1-> menuOperativo (-1,lParqueos, lBicicletas)
-                2-> menuGeneral (-1,lParqueos)
+                1-> menuOperativo (-1,lParqueos, lBicicletas, lUsuarios)
+                2-> menuGeneral (-1,lParqueos, lBicicletas, lUsuarios)
 
             putStrLn("\n\nMenú principal")
             print("1.Opciones operativas")
@@ -76,10 +89,10 @@ menuPrincipal (opcion, lParqueos, lBicicletas) =
             putStrLn "Indique la opción: "
             tempOpcion <- getLine
             let opcion = (read tempOpcion :: Integer)
-            menuPrincipal(opcion, lParqueos, lBicicletas)
+            menuPrincipal(opcion, lParqueos, lBicicletas, lUsuarios)
 
 --menuOperativo :: Integer -> [Parqueo] -> IO()
-menuOperativo (opcion, lParqueos, lBicicletas) =
+menuOperativo (opcion, lParqueos, lBicicletas, lUsuarios) =
     if opcion == 5 then
         print ("volviendo")
     else
@@ -88,7 +101,10 @@ menuOperativo (opcion, lParqueos, lBicicletas) =
                 -1-> putStrLn ("")
                 1-> showParqueos lParqueos
                 2-> showBicicletas lBicicletas
-                3-> cargarUsuarios
+                3-> do
+                    usuarios <- cargarUsuarios lUsuarios
+                    putStrLn("Se han cargado los siguiente usuarios")
+                    showUsuarios usuarios
                 4-> putStrLn("4. Estadisticas")
 
             putStr("\nMenú operativo")
@@ -100,10 +116,10 @@ menuOperativo (opcion, lParqueos, lBicicletas) =
             putStrLn "\nIndique la opción: "
             tempOpcion <- getLine
             let opcion = (read tempOpcion :: Integer)
-            menuOperativo(opcion, lParqueos, lBicicletas)
+            menuOperativo(opcion, lParqueos, lBicicletas, lUsuarios)
 
 
-menuGeneral (opcion, lParqueos) =
+menuGeneral (opcion, lParqueos, lBicicletas, lUsuarios) =
     if opcion == 4 then
         print ("volviendo")
     else
@@ -113,7 +129,9 @@ menuGeneral (opcion, lParqueos) =
                 1-> do
                     putStrLn("1. Consultar bicicletas")
                     consultarBicicletas lParqueos
-                2-> putStrLn("2. Alquilar")
+                2-> do
+                    putStrLn("2. Alquilar")
+                    alquilar( lParqueos, lBicicletas, lUsuarios)
                 3-> putStrLn("3. Facturar")
 
             putStrLn("\nMenú operativo")
@@ -124,10 +142,144 @@ menuGeneral (opcion, lParqueos) =
             putStrLn "Indique la opción: "
             tempOpcion <- getLine
             let opcion = (read tempOpcion :: Integer)
-            menuGeneral(opcion, lParqueos)
+            menuGeneral(opcion, lParqueos, lBicicletas, lUsuarios)
 -----------------------------------------------------------
 --------------------------------------------------------
 
+-- guardar en un txt
+alquilar(lParqueos, lBicicletas, lUsuarios) = do
+    putStrLn ("\n\nalquiler")
+    usuarios <- cargarUsuarios lUsuarios
+    showUsuarios usuarios
+    usuario <- seleccionarUsuario usuarios
+    if usuario == "#" then 
+        print ("Se ha cancelado la operación")
+    else do
+        showParqueos lParqueos
+        putStrLn "Seleccione el parqueo de salida"
+        parqueoSalida <- seleccionarParqueoS lParqueos
+        parqueoLlegada <- seleccionarParqueoL (lParqueos, parqueoSalida)
+        let bicicletasParqueo =getBicicletasParqueo(lBicicletas, parqueoSalida)
+        showBicicletas(bicicletasParqueo)
+        bicicleta <- seleccionarBicicleta(bicicletasParqueo)
+        putStrLn( "Cedula: " ++ usuario ++"\
+                    \ \nSalida: " ++ parqueoSalida ++ "\
+                    \ \nLlegada: "++ parqueoLlegada++ "\
+                    \ \nBicicleta: "++ bicicleta)
+        
+-------------------------------------------------------------------------------------------
+
+getBicicletasParqueo (lBicicletas, nombreParqueo) = do
+    if lBicicletas == [] then 
+        []
+    else do
+        let elemento = head lBicicletas
+        if getParqueoBicicleta(elemento) == nombreParqueo then
+            [elemento] ++ getBicicletasParqueo(tail lBicicletas, nombreParqueo)
+        else
+            getBicicletasParqueo(tail lBicicletas, nombreParqueo)
+
+
+seleccionarBicicleta lBicicletas = do
+    putStrLn "Ingrese el identificador de la bicicleta o (#) para cancelar el alquiler: "
+    bicicleta <- getLine
+    if bicicleta == "#" then 
+        return bicicleta
+    else do
+        if existeBicicleta(lBicicletas, bicicleta) then
+            return bicicleta
+        else do
+            putStrLn "Esta bicicleta no existe o no se encuetra disponible"
+            seleccionarBicicleta lBicicletas
+
+
+
+existeBicicleta ([], idBicicleta) = False
+existeBicicleta (lBicicletas, idBicicleta)= do
+    let primero = (head lBicicletas)
+    let idTemp = getIdBicicleta(primero)
+    if idBicicleta == idTemp then
+        True
+    else
+        existeBicicleta((tail lBicicletas), idBicicleta)
+
+ ------------------------------------------------------------------------------------------   
+ ------------------------------------------------------------------------------------------   
+seleccionarParqueoS lParqueos = do
+    putStrLn "Ingrese el nombre del parqueo de salida o (#) para cancelar el alquiler: "
+    parqueoSalida <- getLine
+    if parqueoSalida == "#" then 
+        return parqueoSalida
+    else do
+        if existeParqueo(lParqueos, parqueoSalida) then
+            return parqueoSalida
+        else do
+            putStrLn "El parqueo no existe"
+            seleccionarParqueoS lParqueos
+
+
+seleccionarParqueoL (lParqueos, pSalida)  = do
+    putStrLn "Ingrese el nombre del parqueo de llegada o (#) para cancelar el alquiler: "
+    parqueoLlegada <- getLine
+    if parqueoLlegada == "#" then 
+        return parqueoLlegada
+    else do
+        if existeParqueo(lParqueos, parqueoLlegada) then
+            if (pSalida /= parqueoLlegada) then
+                return parqueoLlegada
+            else do
+                putStrLn "El parqueo de llegada no puede ser el mismo que el de salida"
+                seleccionarParqueoL (lParqueos, pSalida)
+        else do
+            putStrLn "El parqueo no existe"
+            seleccionarParqueoL(lParqueos, pSalida)
+
+
+existeParqueo ([], nombre) = False
+existeParqueo (lParqueos, nombre)= do
+    let primero = (head lParqueos)
+    let nombreTemp = getNombreParqueo(primero)
+    if nombre == nombreTemp then
+        True
+    else
+        existeParqueo((tail lParqueos), nombre)
+
+
+
+
+-------------------------------------------------------------------------
+seleccionarUsuario lUsuarios = do
+    putStrLn "Ingrese la cedula del usuario o (#) para cancelar el alquiler"
+    cedulaUsuario <- getLine
+    if cedulaUsuario == "#" then 
+        return cedulaUsuario
+    else do
+        if (all isDigit cedulaUsuario) && existePersona(lUsuarios, read cedulaUsuario::Integer) then
+            return cedulaUsuario
+        else do
+            putStrLn "El usuario no existe"
+            seleccionarUsuario lUsuarios
+
+
+existePersona ([], cedula) = False
+existePersona (lUsuarios, cedula)= do
+    let primero = (head lUsuarios)
+    let cedulaTemp = getCedulaUsuario(primero)
+    if cedula == cedulaTemp then
+        True
+    else
+        existePersona((tail lUsuarios), cedula) 
+
+
+
+
+
+
+
+
+-------------------------------------------------------------
+
+--------------------------------------------------------------
 consultarBicicletas lParqueos = do
     putStrLn "Indique x: "
     pX<- getLine
@@ -212,15 +364,8 @@ separaBicicletas (lista) =
 
 ----------------------------------------------------
 
-cargarUsuarios = do
-    putStrLn("Indique la ruta de usuarios: ")
-    lUsuarios <- getLine
-    usuarios <- cargarUsuariosAux lUsuarios
-    putStrLn("Se han cargado los siguiente usuarios")
-    showUsuarios usuarios
-
-cargarUsuariosAux :: FilePath-> IO [Usuario] 
-cargarUsuariosAux archivo = do
+cargarUsuarios :: FilePath-> IO [Usuario] 
+cargarUsuarios archivo = do
         contenido <- readFile archivo
         let lUsuarios = separaUsuarios (toLines contenido)
         return lUsuarios
@@ -320,4 +465,7 @@ main = do
     lBicicletas <- getLine
     bicicletas <-cargarBicicletas lBicicletas
 
-    menuPrincipal (-1, parqueos, bicicletas)
+    putStrLn("Indique la ruta de usuarios: ")
+    lUsuarios <- getLine
+
+    menuPrincipal (-1, parqueos, bicicletas, lUsuarios)
