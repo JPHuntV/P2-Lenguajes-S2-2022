@@ -1,4 +1,9 @@
-identificador,tipo,parqueo
-b001,electrica,a1
-b0d1,electrica,aw
-3001,electrica,sdf
+a001,electrica,en transito
+a0d1,electrica,en transito
+a021,electrica,en transito
+b001,electrica,b
+b0d1,electrica,en transito
+b011,electrica,b
+c001,electrica,en transito
+c0d1,electrica,c
+c041,electrica,c
