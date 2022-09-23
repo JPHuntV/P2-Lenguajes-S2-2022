@@ -1,18 +1,20 @@
 import Data.Char
+import Control.Concurrent--borrar esto
+---------------------------
+--https://stackoverflow.com/questions/22166912/how-to-close-a-file-in-haskell
+--Necesitaba poder escribir al archivo
+--evaluate(force file) solucionó el problema
+---------------------------
+import Control.DeepSeq-----
+import Control.Exception---
+---------------------------
 
-
----información de la empresa
---type NombreEmpresa =  String
---type SitioWeb = String
---type Contacto = Integer
---type TarifaKmPedal = Float
---type TarifaKmElectrico = Float
 data Empresa = Empresa {
     nombreEmpresa::String,
-    sitioWeb::String,
-    contacto::Integer,
-    tarifaKmPedal::Float,
-    tarifaKmElectrico::Float
+    sitioWebEmpresa::String,
+    contactoEmpresa::Integer,
+    tarifaKmPedalEmpresa::Float,
+    tarifaKmElectricoEmpresa::Float
 }deriving(Eq);
 
 
@@ -23,19 +25,12 @@ getTarKmPedal(Empresa _ _ _ pedal _) = pedal;
 getTarKmEle(Empresa _ _ _ _ electrico) = electrico;
 ----------------------------------------------------------------------------------------
 
-
----parqueos
---type NombreParqueo = String
---type DireccionParqueo = String
---type ProvinciaParqueo = String
---type UbicacionX = Float
---type UbicacionY = Float
 data Parqueo = Parqueo {
     nombreParqueo ::String,
     direccionParqueo :: String,
     provinciaParqueo ::String,
-    ubicacionX:: Float,
-    ubicacionY :: Float
+    ubicacionXParqueo:: Float,
+    ubicacionYParqueo :: Float
 } deriving(Eq);
 
 crearParqueo(elemento) = Parqueo (elemento!!0) (elemento!!1) (elemento!!2) (read(elemento!!3) :: Float) (read(elemento!!4) :: Float)
@@ -46,10 +41,6 @@ getUbicacionX (Parqueo _ _ _ x _) = x;
 getUbicacionY (Parqueo _ _ _ _ y) = y;
 
 ------------------------------------------------------------------------------------------
---bicicletas
---type IdentificadorBicicleta = String
---type TipoBicicleta = String
---type ParqueoBicicleta = String
 data Bicicleta = Bicicleta {
     identificadorBicicleta::String,
     tipoBicicleta::String,
@@ -63,14 +54,38 @@ getParqueoBicicleta ( Bicicleta _ _ par) = par;
 ----------------------------------------------------------
 
 --usuarios
-type Cedula =  Integer
-type Nombre = String
-data Usuario = Usuario Cedula Nombre;
+
+data Usuario = Usuario{
+    cedulaUsuario::Integer,
+    nombreUsuario::String
+}deriving(Eq);
 
 crearUsuario(elemento) = Usuario (read(elemento!!0) :: Integer) (elemento!!1)
 getCedulaUsuario(Usuario ced _) = ced;
 getNombreUsuario (Usuario _ nombre) = nombre;
 -------------------------------------------------------------------------------------
+
+--alquiler
+data Alquiler = Alquiler {
+    codigoAlquiler::Integer,
+    cedulaAlquiler::Integer,
+    pSalidaAlquiler::String,
+    pLlegadaAlquiler::String,
+    idBicicletaAlquiler::String,
+    estadoAlquiler::String
+}deriving(Eq);
+
+crearAlquiler(elemento) = Alquiler (read(elemento!!0) :: Integer) (read(elemento!!1) :: Integer) (elemento!!2) (elemento!!3) (elemento!!4) (elemento!!5)
+getCodigoAlquiler(Alquiler cod _ _ _ _ _) = cod;
+getCedulaAlquiler(Alquiler _ ced _ _ _ _) = ced;
+getSalidaAlquiler(Alquiler _ _ salida _ _ _) = salida;
+getLlegadaAlquiler(Alquiler _ _ _ llegada _ _) = llegada;
+getIdBicicletaAlquiler(Alquiler _ _ _ _ idBici _) = idBici;
+getEstadoAlquiler(Alquiler _ _ _ _ _ estado) = estado;
+
+
+
+---------------------------------------------------------------------------------------
 --menuPrincipal :: Integer -> [Parqueo] -> IO()
 menuPrincipal (opcion, lParqueos, lBicicletas, lUsuarios) =
     if opcion == 3 then
@@ -99,8 +114,12 @@ menuOperativo (opcion, lParqueos, lBicicletas, lUsuarios) =
         do
             case opcion of
                 -1-> putStrLn ("")
-                1-> showParqueos lParqueos
-                2-> showBicicletas lBicicletas
+                1-> do
+                    parqueos <-cargarParqueos lParqueos
+                    showParqueos parqueos
+                2-> do
+                    bicicletas <-cargarBicicletas lBicicletas
+                    showBicicletas bicicletas
                 3-> do
                     usuarios <- cargarUsuarios lUsuarios
                     putStrLn("Se han cargado los siguiente usuarios")
@@ -124,14 +143,17 @@ menuGeneral (opcion, lParqueos, lBicicletas, lUsuarios) =
         print ("volviendo")
     else
         do
+            parqueos <-cargarParqueos lParqueos
+            bicicletas <-cargarBicicletas lBicicletas
             case opcion of
                 -1-> putStrLn ("")
                 1-> do
-                    putStrLn("1. Consultar bicicletas")
-                    consultarBicicletas lParqueos
+                    putStrLn("1. Consultar bicicletas") 
+                    consultarBicicletas parqueos
                 2-> do
                     putStrLn("2. Alquilar")
-                    alquilar( lParqueos, lBicicletas, lUsuarios)
+                    
+                    alquilar( parqueos, bicicletas, lUsuarios)
                 3-> putStrLn("3. Facturar")
 
             putStrLn("\nMenú operativo")
@@ -152,23 +174,66 @@ alquilar(lParqueos, lBicicletas, lUsuarios) = do
     usuarios <- cargarUsuarios lUsuarios
     showUsuarios usuarios
     usuario <- seleccionarUsuario usuarios
-    if usuario == "#" then 
+    if usuario == "#" then do
         print ("Se ha cancelado la operación")
     else do
         showParqueos lParqueos
         putStrLn "Seleccione el parqueo de salida"
         parqueoSalida <- seleccionarParqueoS lParqueos
-        parqueoLlegada <- seleccionarParqueoL (lParqueos, parqueoSalida)
-        let bicicletasParqueo =getBicicletasParqueo(lBicicletas, parqueoSalida)
-        showBicicletas(bicicletasParqueo)
-        bicicleta <- seleccionarBicicleta(bicicletasParqueo)
-        putStrLn( "Cedula: " ++ usuario ++"\
-                    \ \nSalida: " ++ parqueoSalida ++ "\
-                    \ \nLlegada: "++ parqueoLlegada++ "\
-                    \ \nBicicleta: "++ bicicleta)
+        if parqueoSalida == "#" then do
+            print ("Se ha cancelado la operación")
+        else do
+            parqueoLlegada <- seleccionarParqueoL (lParqueos, parqueoSalida)
+            if parqueoLlegada == "#" then do
+                print ("Se ha cancelado la operación")
+            else do
+                let bicicletasParqueo =getBicicletasParqueo(lBicicletas, parqueoSalida)
+                showBicicletas(bicicletasParqueo)
+                bicicleta <- seleccionarBicicleta(bicicletasParqueo)
+                if bicicleta == "#" then do
+                    print ("Se ha cancelado la operación")
+                else do
+                    lAlquileres <- cargarAlquileres "alquileres.txt"
+                    let cantAlquileres = length lAlquileres
+                    appendFile "alquileres.txt" (show cantAlquileres ++","++usuario++",\
+                                                \"++parqueoSalida++","++parqueoLlegada++",\
+                                                \"++bicicleta++",activo\n")
+                    bicicletaTransito(lBicicletas,bicicleta)                            
+                    putStrLn( "Codigo: " ++ show cantAlquileres ++"\ 
+                                \ \nCedula: " ++ usuario ++"\
+                                \ \nSalida: " ++ parqueoSalida ++ "\
+                                \ \nLlegada: "++ parqueoLlegada++ "\
+                                \ \nBicicleta: "++ bicicleta)
+
         
 -------------------------------------------------------------------------------------------
 
+
+bicicletaTransito(lBicicletas,bicicleta)= do
+    writeFile "bicicletas.txt" ""
+    bicicletaTransitoAux (lBicicletas,bicicleta)
+
+bicicletaTransitoAux(lBicicletas, bicicleta) = do
+    if lBicicletas == [] then 
+        return ()
+    else do
+        let primero = (head lBicicletas)
+        let idTemp = getIdBicicleta(primero)
+        let tipoTemp = getTipoBicicleta(primero)
+        let parqueoTemp = getParqueoBicicleta(primero)
+        if bicicleta == idTemp then do
+            appendFile "bicicletas.txt" (idTemp++","++tipoTemp++","++"en transito\n")
+            bicicletaTransitoAux(tail lBicicletas, bicicleta)
+        else do
+            appendFile "bicicletas.txt" (idTemp++","++tipoTemp++","++parqueoTemp++"\n")
+            bicicletaTransitoAux(tail lBicicletas, bicicleta)
+
+
+
+
+
+
+---------------------------------------------------------------------------------
 getBicicletasParqueo (lBicicletas, nombreParqueo) = do
     if lBicicletas == [] then 
         []
@@ -346,12 +411,29 @@ toLines :: String -> [String]
 toLines texto = lines texto
 
 ----------------------------------------------------
+---------------------------------------------------
+cargarAlquileres :: FilePath-> IO [Alquiler] 
+cargarAlquileres archivo = do
+        contenido <- readFile archivo
+        let lAlquileres = separarAlquileres (toLines contenido)
+        evaluate(force contenido)
+        return lAlquileres
 
+separarAlquileres :: [[Char]]  -> [Alquiler]        
+separarAlquileres (lista) = 
+    if lista == [] then
+        []
+    else
+        [crearAlquiler(separarPorComas((head lista), ""))] ++ separarAlquileres (tail lista)
+
+
+-------------------------------------
 ----------------------------------------
 cargarBicicletas :: FilePath-> IO [Bicicleta] 
 cargarBicicletas archivo = do
         contenido <- readFile archivo
         let lBicicletas = separaBicicletas (toLines contenido)
+        evaluate(force contenido)
         return lBicicletas
 
 separaBicicletas :: [[Char]]  -> [Bicicleta]        
@@ -459,13 +541,12 @@ showUsuarios lista =
 main = do
     putStrLn("Indique la ruta de parqueos: ")
     lParqueos <- getLine
-    parqueos <-cargarParqueos lParqueos
 
     putStrLn("Indique la ruta de bicicletas: ")
     lBicicletas <- getLine
-    bicicletas <-cargarBicicletas lBicicletas
+    
 
     putStrLn("Indique la ruta de usuarios: ")
     lUsuarios <- getLine
 
-    menuPrincipal (-1, parqueos, bicicletas, lUsuarios)
+    menuPrincipal (-1, lParqueos, lBicicletas, lUsuarios)
