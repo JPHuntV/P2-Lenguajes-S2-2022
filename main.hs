@@ -118,8 +118,8 @@ menuOperativo (opcion, lParqueos, lBicicletas, lUsuarios) =
                     parqueos <-cargarParqueos lParqueos
                     showParqueos parqueos
                 2-> do
-                    bicicletas <-cargarBicicletas lBicicletas
-                    showBicicletas bicicletas
+                    mostrarBicicletas lBicicletas
+                    
                 3-> do
                     usuarios <- cargarUsuarios lUsuarios
                     putStrLn("Se han cargado los siguiente usuarios")
@@ -137,7 +137,16 @@ menuOperativo (opcion, lParqueos, lBicicletas, lUsuarios) =
             let opcion = (read tempOpcion :: Integer)
             menuOperativo(opcion, lParqueos, lBicicletas, lUsuarios)
 
-
+mostrarBicicletas lBicicletas= do
+    bicicletas <-cargarBicicletas lBicicletas
+    putStrLn "Ingrese el nombre del parqueo que desea consultar \
+    \\n# Para consultar todas las bicicletas\
+    \\no transito para consultar las bicicletas en transito\nOpción: "
+    parqueo <- getLine
+    if parqueo == "transito" then
+        showBicicletas (bicicletas,"en transito")
+    else
+        showBicicletas (bicicletas,parqueo)
 menuGeneral (opcion, lParqueos, lBicicletas, lUsuarios) =
     if opcion == 4 then
         print ("volviendo")
@@ -188,7 +197,7 @@ alquilar(lParqueos, lBicicletas, lUsuarios) = do
                 print ("Se ha cancelado la operación")
             else do
                 let bicicletasParqueo =getBicicletasParqueo(lBicicletas, parqueoSalida)
-                showBicicletas(bicicletasParqueo)
+                showBicicletas(lBicicletas,parqueoSalida)
                 bicicleta <- seleccionarBicicleta(bicicletasParqueo)
                 if bicicleta == "#" then do
                     print ("Se ha cancelado la operación")
@@ -497,22 +506,24 @@ showParqueos lista =
 
 --------------------------------------------------------------------------
 
-showBicicleta :: Bicicleta -> [Char]
-showBicicleta bicicleta=
+showBicicleta :: (Bicicleta,String) -> [Char]
+showBicicleta (bicicleta,pUbicacion)=
     let 
         id = getIdBicicleta(bicicleta)
         tipo =  getTipoBicicleta(bicicleta)
         parqueo = getParqueoBicicleta(bicicleta)
     in
-        "\nIdentificador: " ++ show id ++ "\ttipo: " ++ show tipo ++ "\tParqueo: " ++ show parqueo
+        if pUbicacion =="#" ||pUbicacion == parqueo then
+            "\nIdentificador: " ++ show id ++ "\ttipo: " ++ show tipo ++ "\tParqueo: " ++ show parqueo
+        else ""
 
+showBicicletas :: ([Bicicleta],String) -> IO()
+showBicicletas ([],pUbicacion) = print("")
+showBicicletas (lista ,pUbicacion) = do
+    let primero  = head lista
+    putStr(showBicicleta (primero, pUbicacion))
+    showBicicletas(tail lista, pUbicacion)
 
-showBicicletas :: [Bicicleta] -> IO()
-showBicicletas [] = print("")
-showBicicletas lista =
-    do
-        putStr(showBicicleta (head lista))
-        showBicicletas(tail lista)
 
 --------------------------------------------------------------------------
 
