@@ -1,5 +1,6 @@
 import Data.Char
 import Control.Concurrent--borrar esto
+import Data.Typeable
 ---------------------------
 --https://stackoverflow.com/questions/22166912/how-to-close-a-file-in-haskell
 --Necesitaba poder escribir al archivo
@@ -9,81 +10,10 @@ import Control.DeepSeq-----
 import Control.Exception---
 ---------------------------
 
-data Empresa = Empresa {
-    nombreEmpresa::String,
-    sitioWebEmpresa::String,
-    contactoEmpresa::Integer,
-    tarifaKmPedalEmpresa::Float,
-    tarifaKmElectricoEmpresa::Float
-}deriving(Eq);
-
-
-getNombreEmpresa(Empresa nombre _ _ _ _) = nombre;
-getWebEmpresa(Empresa _ web _ _ _) = web;
-getContactoEmpresa(Empresa _ _ contacto _ _) = contacto;
-getTarKmPedal(Empresa _ _ _ pedal _) = pedal;
-getTarKmEle(Empresa _ _ _ _ electrico) = electrico;
-----------------------------------------------------------------------------------------
-
-data Parqueo = Parqueo {
-    nombreParqueo ::String,
-    direccionParqueo :: String,
-    provinciaParqueo ::String,
-    ubicacionXParqueo:: Float,
-    ubicacionYParqueo :: Float
-} deriving(Eq);
-
-crearParqueo(elemento) = Parqueo (elemento!!0) (elemento!!1) (elemento!!2) (read(elemento!!3) :: Float) (read(elemento!!4) :: Float)
-getNombreParqueo (Parqueo nombre _ _ _ _) = nombre;
-getDireccionParqueo (Parqueo _ direccion _ _ _) = direccion;
-getProvinciaParqueo (Parqueo _ _ provincia _ _) = provincia;
-getUbicacionX (Parqueo _ _ _ x _) = x;
-getUbicacionY (Parqueo _ _ _ _ y) = y;
-
+import Estructuras
 ------------------------------------------------------------------------------------------
-data Bicicleta = Bicicleta {
-    identificadorBicicleta::String,
-    tipoBicicleta::String,
-    parqueoBicicleta::String
-}deriving(Eq);
-
-crearBicicleta(elemento) = Bicicleta (elemento!!0) (elemento!!1) (elemento!!2)
-getIdBicicleta (Bicicleta id _ _) = id;
-getTipoBicicleta (Bicicleta _ tipo _) = tipo;
-getParqueoBicicleta ( Bicicleta _ _ par) = par;
-----------------------------------------------------------
-
---usuarios
-
-data Usuario = Usuario{
-    cedulaUsuario::Integer,
-    nombreUsuario::String
-}deriving(Eq);
-
-crearUsuario(elemento) = Usuario (read(elemento!!0) :: Integer) (elemento!!1)
-getCedulaUsuario(Usuario ced _) = ced;
-getNombreUsuario (Usuario _ nombre) = nombre;
--------------------------------------------------------------------------------------
-
---alquiler
-data Alquiler = Alquiler {
-    codigoAlquiler::Integer,
-    cedulaAlquiler::Integer,
-    pSalidaAlquiler::String,
-    pLlegadaAlquiler::String,
-    idBicicletaAlquiler::String,
-    estadoAlquiler::String
-}deriving(Eq);
-
-crearAlquiler(elemento) = Alquiler (read(elemento!!0) :: Integer) (read(elemento!!1) :: Integer) (elemento!!2) (elemento!!3) (elemento!!4) (elemento!!5)
-getCodigoAlquiler(Alquiler cod _ _ _ _ _) = cod;
-getCedulaAlquiler(Alquiler _ ced _ _ _ _) = ced;
-getSalidaAlquiler(Alquiler _ _ salida _ _ _) = salida;
-getLlegadaAlquiler(Alquiler _ _ _ llegada _ _) = llegada;
-getIdBicicletaAlquiler(Alquiler _ _ _ _ idBici _) = idBici;
-getEstadoAlquiler(Alquiler _ _ _ _ _ estado) = estado;
-
-
+------------------------------------------------------------------------------------------
+infoComercial = crearEmpresa(["nombreEmpresa", "webEmpresa","12345", "2234.2", "55.3"])
 
 ---------------------------------------------------------------------------------------
 --menuPrincipal :: Integer -> [Parqueo] -> IO()
@@ -147,6 +77,8 @@ mostrarBicicletas lBicicletas= do
         showBicicletas (bicicletas,"en transito")
     else
         showBicicletas (bicicletas,parqueo)
+
+
 menuGeneral (opcion, lParqueos, lBicicletas, lUsuarios) =
     if opcion == 4 then
         print ("volviendo")
@@ -160,10 +92,11 @@ menuGeneral (opcion, lParqueos, lBicicletas, lUsuarios) =
                     putStrLn("1. Consultar bicicletas") 
                     consultarBicicletas parqueos
                 2-> do
-                    putStrLn("2. Alquilar")
-                    
+                    putStrLn("2. Alquilar")  
                     alquilar( parqueos, bicicletas, lUsuarios)
-                3-> putStrLn("3. Facturar")
+                3-> do
+                    putStrLn("3. Facturar")
+                    facturar (bicicletas,parqueos)
 
             putStrLn("\nMenú operativo")
             putStrLn("1.Consultar bicicletas")
@@ -176,8 +109,106 @@ menuGeneral (opcion, lParqueos, lBicicletas, lUsuarios) =
             menuGeneral(opcion, lParqueos, lBicicletas, lUsuarios)
 -----------------------------------------------------------
 --------------------------------------------------------
+facturar(bicicletas,lParqueos) = do
+    putStrLn("facturar alquiler")
+    listaAlquileres <-cargarAlquileres "alquileres.txt"
+    alquilerTemp <- seleccionarAlquiler listaAlquileres
+    if alquilerTemp == "#" then 
+        print " Se ha cancelado la operación"
+    else do
+        --let bicicleta = getBicicletaAlquilada (read alquilerTemp::Integer, bicicletas, listaAlquileres)
+        lFacturas <- cargarFacturas "facturas.txt"
+        alquilerInfo <- getAlquiler (read alquilerTemp::Integer, listaAlquileres)
+        let cantFacturas = length lFacturas
+        let tipoBicicleta = getTipoBicicleta2((getIdBicicletaAlquiler(alquilerInfo)),bicicletas)
+        let tarifaKm = getTarifa(tipoBicicleta)
+        let pSalida = getSalidaAlquiler(alquilerInfo)
+        let pLlegada = getLlegadaAlquiler(alquilerInfo)
+        distaciaRecorrida <- getDistaciaRecorrida(pSalida, pLlegada, lParqueos)
 
--- guardar en un txt
+        --appendFile "facturas.txt" (show cantFacturas)
+        putStrLn ("Codigo: " ++show cantFacturas ++ "\
+        \ \nNombre empresa: " ++ getNombreEmpresa(infoComercial)++"\
+        \ \nSitio web: " ++ getWebEmpresa(infoComercial) ++ "\
+        \ \nContacto: " ++ show (getContactoEmpresa(infoComercial)) ++ "\
+        \ \nUsuario: " ++ show (getCedulaAlquiler(alquilerInfo)) ++ "\
+        \ \nParqueo Salida: " ++ pSalida ++ "\
+        \ \nparqueo Llegada: " ++ pLlegada ++ "\
+        \ \nidBicicleta: "++ getIdBicicletaAlquiler(alquilerInfo)++ "\
+        \ \ntipoBicicleta: "++ tipoBicicleta ++ "\
+        \ \nDistancia recorrida: " ++ show distaciaRecorrida ++"\
+        \ \nTarifa x Kilometro: " ++ show tarifaKm ++ "\
+        \ \nTotal : " ++ show (distaciaRecorrida * tarifaKm))
+
+getDistaciaRecorrida(pSalida, pLlegada, lParqueos) = do
+    parqueoSalida <- getParqueoXNombre(pSalida,lParqueos)
+    parqueoLlegada <- getParqueoXNombre(pLlegada, lParqueos)
+    let 
+        x1 = getUbicacionX(parqueoSalida)
+        x2 = getUbicacionX(parqueoLlegada)
+        y1 = getUbicacionY(parqueoSalida)
+        y2 = getUbicacionY(parqueoLlegada)
+        f =calcularDistancia(x1,x2,y1,y2) 
+    return f
+
+getParqueoXNombre(nombre, lParqueos) = do
+    let primero = head lParqueos
+    let nombreTemp = getNombreParqueo(primero)
+    if nombre == nombreTemp then
+        return primero
+    else
+        getParqueoXNombre(nombre, tail lParqueos)
+
+getTarifa(tipoTarifa) = do
+    if tipoTarifa == "AE" then
+        getTarKmEle(infoComercial)
+    else 
+        getTarKmPedal(infoComercial)
+
+
+getTipoBicicleta2(idBicicleta, bicicletas) = do
+    let primero = head bicicletas
+    let tipo = getTipoBicicleta(primero)
+    let idTemp = getIdBicicleta(primero)
+    if idBicicleta == idTemp then
+        tipo
+    else do
+        getTipoBicicleta2(idBicicleta, tail bicicletas)
+
+
+getAlquiler(idAlquiler, lAlquileres) = do
+    let primero = head lAlquileres
+    let idTemp = getCodigoAlquiler(primero)
+    if idAlquiler == idTemp then
+         return primero
+    else do
+        getAlquiler(idAlquiler, tail lAlquileres)
+
+
+seleccionarAlquiler lAlquileres = do
+    putStrLn "Ingrese el identificador del alquiler o (#) para cancelar la facturación: "
+    alquiler <- getLine
+    if alquiler == "#" then 
+        return alquiler
+    else do
+        if (all isDigit alquiler) && existeAlquiler(lAlquileres, read alquiler::Integer) then
+            return alquiler
+        else do
+            putStrLn "Este alquiler no existe"
+            seleccionarAlquiler lAlquileres
+
+
+existeAlquiler ([], alquiler) = False
+existeAlquiler(lAlquileres, alquiler)= do
+    let primero = (head lAlquileres)
+    let idTemp = getCodigoAlquiler(primero)
+    if alquiler == idTemp then
+        True
+    else
+        existeAlquiler((tail lAlquileres), alquiler)
+
+---------------------------------------------------------------
+--------------------------------------------------------------
 alquilar(lParqueos, lBicicletas, lUsuarios) = do
     putStrLn ("\n\nalquiler")
     usuarios <- cargarUsuarios lUsuarios
@@ -217,7 +248,6 @@ alquilar(lParqueos, lBicicletas, lUsuarios) = do
         
 -------------------------------------------------------------------------------------------
 
-
 bicicletaTransito(lBicicletas,bicicleta)= do
     writeFile "bicicletas.txt" ""
     bicicletaTransitoAux (lBicicletas,bicicleta)
@@ -236,10 +266,6 @@ bicicletaTransitoAux(lBicicletas, bicicleta) = do
         else do
             appendFile "bicicletas.txt" (idTemp++","++tipoTemp++","++parqueoTemp++"\n")
             bicicletaTransitoAux(tail lBicicletas, bicicleta)
-
-
-
-
 
 
 ---------------------------------------------------------------------------------
@@ -267,7 +293,6 @@ seleccionarBicicleta lBicicletas = do
             seleccionarBicicleta lBicicletas
 
 
-
 existeBicicleta ([], idBicicleta) = False
 existeBicicleta (lBicicletas, idBicicleta)= do
     let primero = (head lBicicletas)
@@ -279,6 +304,8 @@ existeBicicleta (lBicicletas, idBicicleta)= do
 
  ------------------------------------------------------------------------------------------   
  ------------------------------------------------------------------------------------------   
+
+
 seleccionarParqueoS lParqueos = do
     putStrLn "Ingrese el nombre del parqueo de salida o (#) para cancelar el alquiler: "
     parqueoSalida <- getLine
@@ -343,13 +370,6 @@ existePersona (lUsuarios, cedula)= do
         True
     else
         existePersona((tail lUsuarios), cedula) 
-
-
-
-
-
-
-
 
 -------------------------------------------------------------
 
@@ -434,6 +454,23 @@ separarAlquileres (lista) =
         []
     else
         [crearAlquiler(separarPorComas((head lista), ""))] ++ separarAlquileres (tail lista)
+---------------------------------------------------------
+-----------------------------------------------------------
+
+cargarFacturas :: FilePath-> IO [Factura] 
+cargarFacturas archivo = do
+        contenido <- readFile archivo
+        let lFacturas = separarFacturas (toLines contenido)
+        evaluate(force contenido)
+        return lFacturas
+
+separarFacturas :: [[Char]]  -> [Factura]        
+separarFacturas (lista) = 
+    if lista == [] then
+        []
+    else
+        [crearFactura(separarPorComas((head lista), ""))] ++ separarFacturas (tail lista)
+
 
 
 -------------------------------------
@@ -550,6 +587,8 @@ showUsuarios lista =
 --------------------------------------------------------------------------
 
 main = do
+
+
     putStrLn("Indique la ruta de parqueos: ")
     lParqueos <- getLine
 
