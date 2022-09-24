@@ -1,9 +1,9 @@
-a001,TR,en transito
-a0d1,AE,en transito
-a021,TR,en transito
-b001,TR,b
-b0d1,AE,en transito
+a001,TR,b
+a0d1,AE,b
+a021,TR,b
+b001,TR,c
+b0d1,AE,c
 b011,AE,b
-c001,TR,en transito
+c001,TR,b
 c0d1,AE,c
 c041,TR,c
