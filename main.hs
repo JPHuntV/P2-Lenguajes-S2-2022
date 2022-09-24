@@ -121,24 +121,34 @@ facturar(bicicletas,lParqueos) = do
         alquilerInfo <- getAlquiler (read alquilerTemp::Integer, listaAlquileres)
         let cantFacturas = length lFacturas
         let tipoBicicleta = getTipoBicicleta2((getIdBicicletaAlquiler(alquilerInfo)),bicicletas)
-        let tarifaKm = getTarifa(tipoBicicleta)
+        let tarifaKm =getTarifa(tipoBicicleta)
         let pSalida = getSalidaAlquiler(alquilerInfo)
         let pLlegada = getLlegadaAlquiler(alquilerInfo)
+        let idBicicleta =getIdBicicletaAlquiler(alquilerInfo)
         distaciaRecorrida <- getDistaciaRecorrida(pSalida, pLlegada, lParqueos)
 
-        --appendFile "facturas.txt" (show cantFacturas)
-        putStrLn ("Codigo: " ++show cantFacturas ++ "\
-        \ \nNombre empresa: " ++ getNombreEmpresa(infoComercial)++"\
-        \ \nSitio web: " ++ getWebEmpresa(infoComercial) ++ "\
-        \ \nContacto: " ++ show (getContactoEmpresa(infoComercial)) ++ "\
-        \ \nUsuario: " ++ show (getCedulaAlquiler(alquilerInfo)) ++ "\
-        \ \nParqueo Salida: " ++ pSalida ++ "\
-        \ \nparqueo Llegada: " ++ pLlegada ++ "\
-        \ \nidBicicleta: "++ getIdBicicletaAlquiler(alquilerInfo)++ "\
-        \ \ntipoBicicleta: "++ tipoBicicleta ++ "\
-        \ \nDistancia recorrida: " ++ show distaciaRecorrida ++"\
-        \ \nTarifa x Kilometro: " ++ show tarifaKm ++ "\
-        \ \nTotal : " ++ show (distaciaRecorrida * tarifaKm))
+        let factura = crearFactura([show cantFacturas,show(getCedulaAlquiler(alquilerInfo)), pSalida, pLlegada,idBicicleta, tipoBicicleta, show distaciaRecorrida,show tarifaKm, show (distaciaRecorrida * tarifaKm)])
+        appendFile "facturas.txt" (show (getCodigoFactura(factura))++","++show(getUsuarioFactura(factura))++","++getPSalidaFact(factura)++","++getPLlegadaFact(factura)++","++getBiciFactura(factura)++","++getTipoBiciFactura(factura)++","++show(getCantKM(factura))++","++show(getTarifaKMFactura(factura))++","++show(getTotalFactura(factura))++"\n")
+        bicicletaUbicacion(bicicletas, idBicicleta, pLlegada)
+        facturarAlquiler(listaAlquileres, getCodigoAlquiler(alquilerInfo), "facturado")
+
+        
+        
+        printFactura(factura)
+
+printFactura(factura) = do
+       putStrLn ("Codigo: " ++show (getCodigoFactura(factura)) ++ "\
+       \ \nNombre empresa: " ++ getNombreEmpresa(infoComercial)++"\
+       \ \nSitio web: " ++ getWebEmpresa(infoComercial) ++ "\
+       \ \nContacto: " ++ show (getContactoEmpresa(infoComercial)) ++ "\
+       \ \nUsuario: " ++ show (getUsuarioFactura(factura)) ++ "\
+       \ \nParqueo Salida: " ++ getPSalidaFact(factura) ++ "\
+       \ \nparqueo Llegada: " ++ getPLlegadaFact(factura) ++ "\
+       \ \nidBicicleta: "++ getBiciFactura(factura)++ "\
+       \ \ntipoBicicleta: "++ (if getTipoBiciFactura(factura) =="Ae" then "asistencia electrica" else "pedales") ++ "\
+       \ \nDistancia recorrida: " ++ show (getCantKM(factura)) ++"\
+       \ \nTarifa x Kilometro: " ++ show (getTarifaKMFactura(factura))++ "\
+       \ \nTotal : " ++ show ( getTotalFactura(factura)))
 
 getDistaciaRecorrida(pSalida, pLlegada, lParqueos) = do
     parqueoSalida <- getParqueoXNombre(pSalida,lParqueos)
@@ -191,21 +201,26 @@ seleccionarAlquiler lAlquileres = do
     if alquiler == "#" then 
         return alquiler
     else do
-        if (all isDigit alquiler) && existeAlquiler(lAlquileres, read alquiler::Integer) then
+        if (all isDigit alquiler) && existeAlquiler(lAlquileres, read alquiler::Integer,"activo" ) then
+            
             return alquiler
         else do
-            putStrLn "Este alquiler no existe"
+            putStrLn "Este alquiler no existe o ya fue facturado"
             seleccionarAlquiler lAlquileres
 
 
-existeAlquiler ([], alquiler) = False
-existeAlquiler(lAlquileres, alquiler)= do
+existeAlquiler ([], alquiler, estado) = False
+existeAlquiler(lAlquileres, alquiler, estado)= do
     let primero = (head lAlquileres)
     let idTemp = getCodigoAlquiler(primero)
+    let estadoTemp = getEstadoAlquiler(primero)
     if alquiler == idTemp then
-        True
+        if estado == estadoTemp then
+            True
+        else
+            False
     else
-        existeAlquiler((tail lAlquileres), alquiler)
+        existeAlquiler((tail lAlquileres), alquiler,estado)
 
 ---------------------------------------------------------------
 --------------------------------------------------------------
@@ -238,7 +253,7 @@ alquilar(lParqueos, lBicicletas, lUsuarios) = do
                     appendFile "alquileres.txt" (show cantAlquileres ++","++usuario++",\
                                                 \"++parqueoSalida++","++parqueoLlegada++",\
                                                 \"++bicicleta++",activo\n")
-                    bicicletaTransito(lBicicletas,bicicleta)                            
+                    bicicletaUbicacion(lBicicletas,bicicleta,"en transito")                            
                     putStrLn( "Codigo: " ++ show cantAlquileres ++"\ 
                                 \ \nCedula: " ++ usuario ++"\
                                 \ \nSalida: " ++ parqueoSalida ++ "\
@@ -247,12 +262,33 @@ alquilar(lParqueos, lBicicletas, lUsuarios) = do
 
         
 -------------------------------------------------------------------------------------------
+facturarAlquiler(lAlquileres,alquiler, estado) = do
+    writeFile "alquileres.txt" ""
+    facturarAlquilerAux(lAlquileres, alquiler, estado)
 
-bicicletaTransito(lBicicletas,bicicleta)= do
+facturarAlquilerAux(lAlquileres, alquiler, estado) = do
+    if lAlquileres == [] then
+        return ()
+    else do
+        let primero = head lAlquileres
+        let codigoTemp = getCodigoAlquiler(primero)
+        let cedulaTemp = getCedulaAlquiler(primero)
+        let pSalidaTemp = getSalidaAlquiler(primero)
+        let pLlegadaTemp = getLlegadaAlquiler(primero)
+        let idBicicletaTemp = getIdBicicletaAlquiler(primero)
+        let estadoTemp = getEstadoAlquiler(primero)
+        if alquiler == codigoTemp then do
+            appendFile "alquileres.txt" (show codigoTemp ++ "," ++ show cedulaTemp ++ "," ++ pSalidaTemp ++ "," ++ pLlegadaTemp ++ "," ++ idBicicletaTemp  ++ "," ++ estado ++ "\n")
+            facturarAlquilerAux(tail lAlquileres,alquiler, estado)
+        else do
+            appendFile "alquileres.txt" (show codigoTemp ++ "," ++ show cedulaTemp ++ "," ++ pSalidaTemp ++ "," ++ pLlegadaTemp ++ "," ++ idBicicletaTemp  ++ "," ++ estadoTemp ++ "\n")
+            facturarAlquilerAux(tail lAlquileres,alquiler, estado)
+
+bicicletaUbicacion(lBicicletas,bicicleta, ubicacion)= do
     writeFile "bicicletas.txt" ""
-    bicicletaTransitoAux (lBicicletas,bicicleta)
+    bicicletaUbicacionAux (lBicicletas,bicicleta, ubicacion)
 
-bicicletaTransitoAux(lBicicletas, bicicleta) = do
+bicicletaUbicacionAux(lBicicletas, bicicleta, ubicacion) = do
     if lBicicletas == [] then 
         return ()
     else do
@@ -261,11 +297,11 @@ bicicletaTransitoAux(lBicicletas, bicicleta) = do
         let tipoTemp = getTipoBicicleta(primero)
         let parqueoTemp = getParqueoBicicleta(primero)
         if bicicleta == idTemp then do
-            appendFile "bicicletas.txt" (idTemp++","++tipoTemp++","++"en transito\n")
-            bicicletaTransitoAux(tail lBicicletas, bicicleta)
+            appendFile "bicicletas.txt" (idTemp++","++tipoTemp++","++ubicacion ++"\n")
+            bicicletaUbicacionAux(tail lBicicletas, bicicleta, ubicacion)
         else do
             appendFile "bicicletas.txt" (idTemp++","++tipoTemp++","++parqueoTemp++"\n")
-            bicicletaTransitoAux(tail lBicicletas, bicicleta)
+            bicicletaUbicacionAux(tail lBicicletas, bicicleta, ubicacion)
 
 
 ---------------------------------------------------------------------------------

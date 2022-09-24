@@ -97,5 +97,5 @@ getPLlegadaFact (Factura _ _ _ pLlegada _ _ _ _ _) = pLlegada ;
 getBiciFactura (Factura _ _ _ _ bici _ _ _ _) = bici ;
 getTipoBiciFactura (Factura _ _ _ _ _ tipoBici _ _ _) = tipoBici;
 getCantKM (Factura _ _ _ _ _ _ cantKm _ _) = cantKm;
-getTarifaKM (Factura _ _ _ _ _ _ _ tarifaKm _) =tarifaKM ;
-getTotal (Factura _ _ _ _ _ _ _ _ total) = total;
+getTarifaKMFactura (Factura _ _ _ _ _ _ _ tarifaKm _) =tarifaKm ;
+getTotalFactura (Factura _ _ _ _ _ _ _ _ total) = total;
