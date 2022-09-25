@@ -1,6 +1,7 @@
 import Data.Char
 import Control.Concurrent--borrar esto
 import Data.Typeable
+import Data.List
 ---------------------------
 --https://stackoverflow.com/questions/22166912/how-to-close-a-file-in-haskell
 --Necesitaba poder escribir al archivo
@@ -54,7 +55,8 @@ menuOperativo (opcion, lParqueos, lBicicletas, lUsuarios) =
                     usuarios <- cargarUsuarios lUsuarios
                     putStrLn("Se han cargado los siguiente usuarios")
                     showUsuarios usuarios
-                4-> putStrLn("4. Estadisticas")
+                4-> do
+                    menuEstadisticas(-1, lParqueos, lBicicletas, lUsuarios)
 
             putStr("\nMenú operativo")
             putStr("\n1. Mostrar parqueos")
@@ -109,6 +111,90 @@ menuGeneral (opcion, lParqueos, lBicicletas, lUsuarios) =
             menuGeneral(opcion, lParqueos, lBicicletas, lUsuarios)
 -----------------------------------------------------------
 --------------------------------------------------------
+
+menuEstadisticas (opcion, lParqueos, lBicicletas, lUsuarios) =
+    if opcion == 5 then
+        print ("volviendo")
+    else
+        do
+            lFacturas <- cargarFacturas "facturas.txt"
+            case opcion of
+                -1-> putStrLn ("")
+                1-> do
+                    putStrLn("top 5 usuarios")
+                    getTop5Usuarios lFacturas
+                2-> do
+                    putStrLn("top 5 parqueos")
+                   -- getTop5Parqueos lFacturas
+                3-> do
+                    putStrLn("top 3 bicicletas")
+                4-> putStrLn("resumen")
+
+            putStr("\nMenú estadisticas")
+            putStr("\n1. Top 5 usuarios con más viajes")
+            putStr("\n2. Top 5 parqueos con más viajes")
+            putStr("\n3. Top 3 bicicletas con más kilometros recorridos")
+            putStr("\n4. Resumen")
+            putStr("\n5. Volver")
+            putStrLn "\nIndique la opción: "
+            tempOpcion <- getLine
+            let opcion = (read tempOpcion :: Integer)
+            menuEstadisticas (opcion, lParqueos, lBicicletas, lUsuarios)
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------
+getTop5Usuarios lFacturas= do
+    
+    let lViajesUsuario = elimViajesRepetidos(getViajesXUsuario(lFacturas))
+    let ordenada = sortBy(\x1 x2 -> compare (last x2) (last x1)) lViajesUsuario --https://stackoverflow.com/questions/19587518/ordering-a-list-of-lists-in-haskell
+    let top5 = take 5 ordenada
+    imprimirListaTop (top5)
+
+getViajesXUsuario lFacturas = do
+    if lFacturas == [] then
+        []
+    else do
+        let elemento = head lFacturas
+        let usuario = getUsuarioFactura(elemento)
+        let cantViajes = getViajesXUsuarioAux(usuario, lFacturas)
+        --putStrLn ("usuario: " ++ show usuario ++ " cantidad: " ++ show cantViajes)
+        [[show usuario]++[show cantViajes]] ++ getViajesXUsuario(tail lFacturas)
+        
+
+
+
+getViajesXUsuarioAux (usuario, lFacturas) = do
+    if lFacturas == [] then
+        0
+    else do
+        let elemento = head lFacturas
+        let usuarioTemp = getUsuarioFactura(elemento)
+        if usuarioTemp == usuario then
+            1 + getViajesXUsuarioAux(usuario, tail lFacturas)
+        else
+            getViajesXUsuarioAux(usuario, tail lFacturas)
+
+
+imprimirListaTop lista = do
+    --print lista
+    if lista == [] then
+        return ()
+    else do 
+        let primero = head lista
+        putStrLn ("Usuario: " ++ head primero ++ " cantidad: " ++last primero)
+        imprimirListaTop (tail lista)
+
+elimViajesRepetidos (lViajesUsuario) = do
+    if length lViajesUsuario == 0 then
+        []
+    else do
+        let primero = head lViajesUsuario
+        let usuario = head primero
+        let nuevaLista = filter(\x ->(head x) /= usuario) lViajesUsuario
+        [primero] ++ elimViajesRepetidos(nuevaLista)
+
+----------------------------------------------------------------------
+--------------------------------------------------------------------------
 facturar(bicicletas,lParqueos) = do
     putStrLn("facturar alquiler")
     listaAlquileres <-cargarAlquileres "alquileres.txt"
@@ -234,7 +320,7 @@ alquilar(lParqueos, lBicicletas, lUsuarios) = do
     else do
         showParqueos lParqueos
         putStrLn "Seleccione el parqueo de salida"
-        parqueoSalida <- seleccionarParqueoS lParqueos
+        parqueoSalida <- seleccionarParqueoS (lParqueos,lBicicletas)
         if parqueoSalida == "#" then do
             print ("Se ha cancelado la operación")
         else do
@@ -342,17 +428,22 @@ existeBicicleta (lBicicletas, idBicicleta)= do
  ------------------------------------------------------------------------------------------   
 
 
-seleccionarParqueoS lParqueos = do
+seleccionarParqueoS (lParqueos, lBicicletas) = do
     putStrLn "Ingrese el nombre del parqueo de salida o (#) para cancelar el alquiler: "
     parqueoSalida <- getLine
     if parqueoSalida == "#" then 
         return parqueoSalida
     else do
-        if existeParqueo(lParqueos, parqueoSalida) then
-            return parqueoSalida
+        if existeParqueo(lParqueos, parqueoSalida) then do
+            let bicicletasParqueo =getBicicletasParqueo(lBicicletas, parqueoSalida)
+            if length bicicletasParqueo == 0 then do
+                putStrLn "En este momento no hay bicicletas disponibles en este parqueo"
+                seleccionarParqueoS (lParqueos, lBicicletas)
+            else
+                return parqueoSalida
         else do
             putStrLn "El parqueo no existe"
-            seleccionarParqueoS lParqueos
+            seleccionarParqueoS (lParqueos, lBicicletas)
 
 
 seleccionarParqueoL (lParqueos, pSalida)  = do
