@@ -45,19 +45,20 @@ menuOperativo (opcion, lParqueos, lBicicletas, lUsuarios) =
         do
             parqueos <-cargarParqueos lParqueos
             usuarios <- cargarUsuarios lUsuarios
+            bicicletas <- cargarBicicletas lBicicletas
             case opcion of
                 -1-> putStrLn ("")
                 1-> do
                     showParqueos parqueos
                 2-> do
-                    mostrarBicicletas lBicicletas
+                    mostrarBicicletas bicicletas
                     
                 3-> do
                     
                     putStrLn("Se han cargado los siguiente usuarios")
                     showUsuarios usuarios
                 4-> do
-                    menuEstadisticas(-1, parqueos, lBicicletas, usuarios)
+                    menuEstadisticas(-1, parqueos, bicicletas, usuarios)
 
             putStr("\nMenú operativo")
             putStr("\n1. Mostrar parqueos")
@@ -71,15 +72,14 @@ menuOperativo (opcion, lParqueos, lBicicletas, lUsuarios) =
             menuOperativo(opcion, lParqueos, lBicicletas, lUsuarios)
 
 mostrarBicicletas lBicicletas= do
-    bicicletas <-cargarBicicletas lBicicletas
     putStrLn "Ingrese el nombre del parqueo que desea consultar \
     \\n# Para consultar todas las bicicletas\
     \\no transito para consultar las bicicletas en transito\nOpción: "
     parqueo <- getLine
     if parqueo == "transito" then
-        showBicicletas (bicicletas,"en transito")
+        showBicicletas (lBicicletas,"en transito")
     else
-        showBicicletas (bicicletas,parqueo)
+        showBicicletas (lBicicletas,parqueo)
 
 
 menuGeneral (opcion, lParqueos, lBicicletas, lUsuarios) =
@@ -129,6 +129,7 @@ menuEstadisticas (opcion, lParqueos, lBicicletas, lUsuarios) =
                     getTop5Parqueos (lFacturas,lParqueos)
                 3-> do
                     putStrLn("top 3 bicicletas")
+                    getTop3Bicicletas(lFacturas,lBicicletas)
                 4-> putStrLn("resumen")
 
             putStr("\nMenú estadisticas")
@@ -141,6 +142,38 @@ menuEstadisticas (opcion, lParqueos, lBicicletas, lUsuarios) =
             tempOpcion <- getLine
             let opcion = (read tempOpcion :: Integer)
             menuEstadisticas (opcion, lParqueos, lBicicletas, lUsuarios)
+--------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------
+
+getTop3Bicicletas (lFacturas, lBicicletas)= do
+    let lDistanciaBici = getDistanciaBici(lFacturas, lBicicletas)
+    let ordenada = sortBy(\x1 x2 -> compare (read (last x2) ::Float) (read(last x1) ::Float)) lDistanciaBici --https://stackoverflow.com/questions/19587518/ordering-a-list-of-lists-in-haskell
+    let top3 = take 3 ordenada
+    imprimirListaTop (top3,"Bicicleta", "Cantidad de Km recorridos")
+
+getDistanciaBici (lFacturas, lBicicletas) = do
+    if lBicicletas == [] then
+        []
+    else do
+        let elemento = head lBicicletas
+        let idBici = getIdBicicleta(elemento)
+        let distanciaRec = getDistanciaBiciAux(idBici, lFacturas)
+        [[idBici]++[show distanciaRec]] ++ getDistanciaBici(lFacturas, tail lBicicletas)
+        
+
+
+
+getDistanciaBiciAux (idBici, lFacturas) = do
+    if lFacturas == [] then
+        0
+    else do
+        let elemento = head lFacturas
+        let idBiciTemp = getBiciFactura(elemento)
+        let distanciaTemp = getCantKM(elemento)
+        if idBici == idBiciTemp then
+            distanciaTemp + getDistanciaBiciAux(idBici, tail lFacturas)
+        else
+            getDistanciaBiciAux(idBici, tail lFacturas)
 
 
 
@@ -149,9 +182,9 @@ menuEstadisticas (opcion, lParqueos, lBicicletas, lUsuarios) =
 --------------------------------------------------------------------------------------------------------------------------------------------
 getTop5Parqueos (lFacturas, lParqueos)= do
     let lViajesParqueo = getViajesXParqueo(lFacturas, lParqueos)
-    let ordenada = sortBy(\x1 x2 -> compare (last x2) (last x1)) lViajesParqueo --https://stackoverflow.com/questions/19587518/ordering-a-list-of-lists-in-haskell
+    let ordenada = sortBy(\x1 x2 -> compare (read (last x2) :: Integer) (read (last x1) ::Integer)) lViajesParqueo --https://stackoverflow.com/questions/19587518/ordering-a-list-of-lists-in-haskell
     let top5 = take 5 ordenada
-    imprimirListaTop (top5)
+    imprimirListaTop (top5,"Parqueo","Cantidad de viajes salida/llegada")
 
 getViajesXParqueo (lFacturas, lParqueos) = do
     if lParqueos == [] then
@@ -188,9 +221,9 @@ getViajesXParqueoAux (nombreParqueo, lFacturas) = do
 getTop5Usuarios (lFacturas,lUsuarios)= do
     
     let lViajesUsuario = getViajesXUsuario(lFacturas, lUsuarios)
-    let ordenada = sortBy(\x1 x2 -> compare (last x2) (last x1)) lViajesUsuario --https://stackoverflow.com/questions/19587518/ordering-a-list-of-lists-in-haskell
+    let ordenada = sortBy(\x1 x2 -> compare (read (last x2) :: Integer) (read (last x1) ::Integer)) lViajesUsuario --https://stackoverflow.com/questions/19587518/ordering-a-list-of-lists-in-haskell
     let top5 = take 5 ordenada
-    imprimirListaTop (top5)
+    imprimirListaTop (top5,"Usuario", "Cantidad de viajes completados")
 
 getViajesXUsuario (lFacturas, lUsuarios) = do
     if lUsuarios == [] then
@@ -216,14 +249,14 @@ getViajesXUsuarioAux (usuario, lFacturas) = do
             getViajesXUsuarioAux(usuario, tail lFacturas)
 
 
-imprimirListaTop lista = do
+imprimirListaTop (lista,arg1,arg2) = do
     --print lista
     if lista == [] then
         return ()
     else do 
         let primero = head lista
-        putStrLn ("Usuario: " ++ head primero ++ " cantidad: " ++last primero)
-        imprimirListaTop (tail lista)
+        putStrLn (arg1++": " ++ head primero ++"\t"++ arg2++": " ++last primero)
+        imprimirListaTop (tail lista,arg1,arg2)
 
 elimViajesRepetidos (lViajesUsuario) = do
     if length lViajesUsuario == 0 then
