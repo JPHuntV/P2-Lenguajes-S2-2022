@@ -1,9 +1,0 @@
-a001,electrica,a
-a0d1,electrica,a
-a001,electrica,a
-b001,electrica,b
-b0d1,electrica,b
-b001,electrica,b
-c001,electrica,en transito
-c0d1,electrica,c
-c001,electrica,en transito
