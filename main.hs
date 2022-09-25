@@ -4,6 +4,7 @@ import Data.List
 import System.Exit
 import System.Directory -- verificar si archivo existe
 
+
 ---------------------------
 --https://stackoverflow.com/questions/22166912/how-to-close-a-file-in-haskell
 --Necesitaba poder escribir al archivo
@@ -54,25 +55,30 @@ menuOperativo (opcion, lParqueos, lBicicletas, lUsuarios) =
             case opcion of
                 -1-> putStrLn ("")
                 1-> do
-                    putStrLn ("\n\n#################### Parqueos ####################")
+                    putStrLn ("\n\n\n#################### Parqueos ####################")
                     showParqueos parqueos
+                    putStrLn"\n--------------------------------------------------\n\n\n"
                 2-> do
+                    putStrLn ("\n\n\n#################### Parqueos ####################")
+                    showParqueos parqueos
+                    putStrLn"\n--------------------------------------------------\n\n\n"
                     mostrarBicicletas bicicletas
                 3-> do
-                    putStrLn("Se han cargado los siguiente usuarios")
+                    putStrLn ("\n\n\n#################### Usuarios ####################")
                     showUsuarios usuarios
+                    putStrLn"\n--------------------------------------------------\n\n\n"
                 4-> do
                     menuEstadisticas(-1, parqueos, bicicletas, usuarios)
                 6-> salir
 
-            putStrLn("\nMenú operativo\
+            putStrLn("\n\n\nMenú operativo\
                     \ \n1. Mostrar parqueos\
                     \ \n2. Mostrar bicicletas\
                     \ \n3. Cargar usuarios\
                     \ \n4. Estadisticas\ 
                     \ \n5. Volver\
                     \ \n6. Salir\
-                    \ \nIndique la opción: ")
+                    \ \nSeleccione una opción: ")
 
             tempOpcion <- getLine
             let opcion = (read tempOpcion :: Integer)
@@ -92,20 +98,21 @@ menuGeneral (opcion, lParqueos, lBicicletas, lUsuarios) =
                 -1-> putStrLn ("")
                 1-> do
                     putStrLn("1. Consultar bicicletas") 
-                    consultarBicicletas parqueos
+                    consultarBicicletas (parqueos, bicicletas)
                 2-> do
                     putStrLn("2. Alquilar")  
                     alquilar( parqueos, bicicletas, lUsuarios)
                 3-> do
                     putStrLn("3. Facturar")
                     facturar (bicicletas,parqueos)
-
-            putStrLn("\nMenú operativo")
-            putStrLn("1.Consultar bicicletas")
-            putStrLn("2.Alquilar")
-            putStrLn("3.Facturar")
-            putStrLn("4.Volver")
-            putStrLn "Indique la opción: "
+                5->salir
+            putStrLn("\n\n\nMenú operativo\ 
+                    \ \n1. Consultar bicicletas\ 
+                    \ \n2. Alquilar\
+                    \ \n3. Facturar\
+                    \ \n4. Volver\
+                    \ \n5. Salir\
+                    \ \nSeleccione una opción: ")
             tempOpcion <- getLine
             let opcion = (read tempOpcion :: Integer)
             menuGeneral(opcion, lParqueos, lBicicletas, lUsuarios)
@@ -121,22 +128,29 @@ menuEstadisticas (opcion, lParqueos, lBicicletas, lUsuarios) =
             case opcion of
                 -1-> putStrLn ("")
                 1-> do
-                    putStrLn("top 5 usuarios")
+                    putStrLn ("\n\n\n#################### Top 5 usuarios ####################\n\n\n")
                     getTop5Usuarios (lFacturas, lUsuarios)
+                    putStrLn"\n--------------------------------------------------\n\n\n"
                 2-> do
-                    putStrLn("top 5 parqueos")
+                    putStrLn ("\n\n\n#################### Top 5 parqueos ####################\n\n\n")
                     getTop5Parqueos (lFacturas,lParqueos)
+                    putStrLn"\n--------------------------------------------------\n\n\n"
                 3-> do
-                    putStrLn("top 3 bicicletas")
+                    putStrLn ("\n\n\n#################### Top 3 bicicletas ####################\n\n\n")
                     getTop3Bicicletas(lFacturas,lBicicletas)
-                4-> putStrLn("resumen")
-
-            putStr("\nMenú estadisticas")
-            putStr("\n1. Top 5 usuarios con más viajes")
-            putStr("\n2. Top 5 parqueos con más viajes")
-            putStr("\n3. Top 3 bicicletas con más kilometros recorridos")
-            putStr("\n4. Resumen")
-            putStr("\n5. Volver")
+                    putStrLn"\n--------------------------------------------------\n\n\n"
+                4-> do
+                    putStrLn ("\n\n\n#################### Resumen ####################\n\n")
+                    resumen(lFacturas)
+                    putStrLn"\n\n--------------------------------------------------\n\n\n"
+                6-> salir
+            putStr("\nMenú estadisticas\
+                    \ \n1. Top 5 usuarios con más viajes\
+                    \ \n2. Top 5 parqueos con más viajes\
+                    \ \n3. Top 3 bicicletas con más kilometros recorridos\
+                    \ \n4. Resumen\
+                    \ \n5. Volver\
+                    \ \n6. Salir")
             putStrLn "\nIndique la opción: "
             tempOpcion <- getLine
             let opcion = (read tempOpcion :: Integer)
@@ -183,12 +197,7 @@ showParqueos lista =
 
 -- #####
 -- parqueo más cercano
-consultarBicicletas lParqueos = do
-    putStrLn "Indique x: "
-    pX<- getLine
-    putStrLn "Indique y: "
-    pY<- getLine
-    getParqueoCercano (read (pX) ::Float, read (pY) ::Float, lParqueos, (head lParqueos))
+
 
 
 
@@ -200,18 +209,18 @@ getParqueoCercano (x1, y1, lParqueos,cercano) = do
             provincia = getProvinciaParqueo(cercano)
             x = getUbicacionX(cercano)
             y = getUbicacionY(cercano)
-        putStrLn ("\n\n--------------------------------\
-                    \ \nEl parqueo más cercano es: \
+        putStrLn ("\n\n\n--------------------------------\
+                    \ \n\nEl parqueo más cercano es: \
                     \ \n\nParqueo: " ++ show nombre ++ "\
                     \ \nDireccion: " ++ show direccion ++ "\
                     \ \nProvincia: " ++ show provincia ++ "\
                     \ \nX: " ++ show x ++ "\
                     \ \nY: " ++ show y ++ "\
-                    \ \n-----------------------------------")
+                    \ \n\n-----------------------------------")
+        return nombre
     else
         do
         let par = head lParqueos
-        print (calcularDistanciaParqueo(x1,y1,par))
         if calcularDistanciaParqueo(x1,y1,par)<= calcularDistanciaParqueo(x1,y1,cercano) then
             getParqueoCercano(x1,y1,(tail lParqueos),par)
         else
@@ -330,25 +339,30 @@ separarAlquileres (lista) =
         [crearAlquiler(separarPorComas((head lista), ""))] ++ separarAlquileres (tail lista)
 
 alquilar(lParqueos, lBicicletas, lUsuarios) = do
-    putStrLn ("\n\nalquiler")
     usuarios <- cargarUsuarios lUsuarios
+    putStrLn ("\n\n\n#################### Usuarios ####################")
     showUsuarios usuarios
+    putStrLn"\n--------------------------------------------------\n"
     usuario <- seleccionarUsuario usuarios
     if usuario == "#" then do
         print ("Se ha cancelado la operación")
     else do
+        putStrLn ("\n\n\n#################### Parqueos ####################")
         showParqueos lParqueos
-        putStrLn "Seleccione el parqueo de salida"
+        putStrLn"\n--------------------------------------------------\n"
         parqueoSalida <- seleccionarParqueoS (lParqueos,lBicicletas)
         if parqueoSalida == "#" then do
             print ("Se ha cancelado la operación")
         else do
+            putStrLn("\n")
             parqueoLlegada <- seleccionarParqueoL (lParqueos, parqueoSalida)
             if parqueoLlegada == "#" then do
                 print ("Se ha cancelado la operación")
             else do
                 let bicicletasParqueo =getBicicletasParqueo(lBicicletas, parqueoSalida)
-                showBicicletas(lBicicletas,parqueoSalida)
+                putStrLn ("\n\n\n#################### Bicicletas ####################")
+                showBicicletas(lBicicletas,parqueoSalida,0)
+                putStrLn"\n--------------------------------------------------\n"
                 bicicleta <- seleccionarBicicleta(bicicletasParqueo)
                 if bicicleta == "#" then do
                     print ("Se ha cancelado la operación")
@@ -359,11 +373,14 @@ alquilar(lParqueos, lBicicletas, lUsuarios) = do
                                                 \"++parqueoSalida++","++parqueoLlegada++",\
                                                 \"++bicicleta++",activo\n")
                     bicicletaUbicacion(lBicicletas,bicicleta,"en transito")                            
-                    putStrLn( "Codigo: " ++ show cantAlquileres ++"\ 
+                    putStrLn( "\n\n¡Se ha generado el alguiler!\
+                                \ \n\n----------------------------------------\
+                                \ \nCodigo: " ++ show cantAlquileres ++"\ 
                                 \ \nCedula: " ++ usuario ++"\
                                 \ \nSalida: " ++ parqueoSalida ++ "\
                                 \ \nLlegada: "++ parqueoLlegada++ "\
-                                \ \nBicicleta: "++ bicicleta)
+                                \ \nBicicleta: "++ bicicleta ++" \
+                                \ \n----------------------------------------")
 
 
 getAlquiler(idAlquiler, lAlquileres) = do
@@ -425,6 +442,27 @@ facturarAlquilerAux(lAlquileres, alquiler, estado) = do
             appendFile "alquileres.txt" (show codigoTemp ++ "," ++ show cedulaTemp ++ "," ++ pSalidaTemp ++ "," ++ pLlegadaTemp ++ "," ++ idBicicletaTemp  ++ "," ++ estadoTemp ++ "\n")
             facturarAlquilerAux(tail lAlquileres,alquiler, estado)
 
+
+showAlquilerActivo :: [Alquiler] -> IO()
+showAlquilerActivo [] = putStrLn("")
+showAlquilerActivo lista = do
+    let alquiler = head lista
+    let estadoAlquiler = getEstadoAlquiler(alquiler)
+    if estadoAlquiler == "activo" then do
+        let codigoAlquiler = getCodigoAlquiler(alquiler)
+        let cedulaAlquiler = getCedulaAlquiler(alquiler)
+        let pSalidaAlquiler = getSalidaAlquiler(alquiler)
+        let pLlegadaAlquiler = getLlegadaAlquiler(alquiler)
+        let idBicicletaAlquiler = getIdBicicletaAlquiler(alquiler)
+        putStrLn( "Codigo: " ++ show codigoAlquiler ++"\ 
+                \ usuario: " ++ show cedulaAlquiler ++"\
+                \ Salida: " ++ pSalidaAlquiler ++ "\
+                \ Llegada: "++ pLlegadaAlquiler++ "\
+                \ Bicicleta: "++ idBicicletaAlquiler++"\
+                \ Estado: " ++ estadoAlquiler)
+        showAlquilerActivo(tail lista)
+    else
+        showAlquilerActivo(tail lista)
 ------------------------------------------------------------------------------------------------
 --
 --
@@ -447,13 +485,14 @@ separarFacturas (lista) =
 
 
 facturar(bicicletas,lParqueos) = do
-    putStrLn("facturar alquiler")
     listaAlquileres <-cargarAlquileres "alquileres.txt"
+    putStrLn ("\n\n\n#################### Alquileres Activos ####################\n")
+    showAlquilerActivo(listaAlquileres)
+    putStrLn"\n--------------------------------------------------\n"
     alquilerTemp <- seleccionarAlquiler listaAlquileres
     if alquilerTemp == "#" then 
         print " Se ha cancelado la operación"
     else do
-        --let bicicleta = getBicicletaAlquilada (read alquilerTemp::Integer, bicicletas, listaAlquileres)
         lFacturas <- cargarFacturas "facturas.txt"
         alquilerInfo <- getAlquiler (read alquilerTemp::Integer, listaAlquileres)
         let cantFacturas = length lFacturas
@@ -468,22 +507,25 @@ facturar(bicicletas,lParqueos) = do
         appendFile "facturas.txt" (show (getCodigoFactura(factura))++","++show(getUsuarioFactura(factura))++","++getPSalidaFact(factura)++","++getPLlegadaFact(factura)++","++getBiciFactura(factura)++","++getTipoBiciFactura(factura)++","++show(getCantKM(factura))++","++show(getTarifaKMFactura(factura))++","++show(getTotalFactura(factura))++"\n")
         bicicletaUbicacion(bicicletas, idBicicleta, pLlegada)
         facturarAlquiler(listaAlquileres, getCodigoAlquiler(alquilerInfo), "facturado")
-
+        putStrLn("\n¡El alquiler " ++ alquilerTemp ++ " ha sido facturado!")
+        putStrLn ("\nSe ha generado la siguiente factura")
         printFactura(factura)
 
 printFactura(factura) = do
-       putStrLn ("Codigo: " ++show (getCodigoFactura(factura)) ++ "\
-       \ \nNombre empresa: " ++ getNombreEmpresa(infoComercial)++"\
-       \ \nSitio web: " ++ getWebEmpresa(infoComercial) ++ "\
-       \ \nContacto: " ++ show (getContactoEmpresa(infoComercial)) ++ "\
-       \ \nUsuario: " ++ show (getUsuarioFactura(factura)) ++ "\
-       \ \nParqueo Salida: " ++ getPSalidaFact(factura) ++ "\
-       \ \nparqueo Llegada: " ++ getPLlegadaFact(factura) ++ "\
-       \ \nidBicicleta: "++ getBiciFactura(factura)++ "\
-       \ \ntipoBicicleta: "++ (if getTipoBiciFactura(factura) =="Ae" then "asistencia electrica" else "pedales") ++ "\
-       \ \nDistancia recorrida: " ++ show (getCantKM(factura)) ++"\
-       \ \nTarifa x Kilometro: " ++ show (getTarifaKMFactura(factura))++ "\
-       \ \nTotal : " ++ show ( getTotalFactura(factura)))
+    putStrLn ("\n\n#################### Factura ####################")
+    putStrLn ("Codigo: " ++show (getCodigoFactura(factura)) ++ "\
+    \ \nNombre empresa: " ++ getNombreEmpresa(infoComercial)++"\
+    \ \nSitio web: " ++ getWebEmpresa(infoComercial) ++ "\
+    \ \nContacto: " ++ show (getContactoEmpresa(infoComercial)) ++ "\
+    \ \nUsuario: " ++ show (getUsuarioFactura(factura)) ++ "\
+    \ \nParqueo Salida: " ++ getPSalidaFact(factura) ++ "\
+    \ \tParqueo Llegada: " ++ getPLlegadaFact(factura) ++ "\
+    \ \nidBicicleta: "++ getBiciFactura(factura)++ "\
+    \ \ttipoBicicleta: "++ (if getTipoBiciFactura(factura) =="Ae" then "asistencia electrica" else "pedales") ++ "\
+    \ \nDistancia recorrida: " ++ show (getCantKM(factura)) ++"\
+    \ \nTarifa x Kilometro: " ++ show (getTarifaKMFactura(factura))++ "\
+    \ \nTotal colones: " ++ show ( getTotalFactura(factura)))
+    putStrLn"\n--------------------------------------------------\n"
 
 
 ------------------------------------------------------------------------------------------------
@@ -508,24 +550,46 @@ separaBicicletas (lista) =
     else
         [crearBicicleta(separarPorComas((head lista), ""))] ++ separaBicicletas (tail lista)
 
-showBicicleta :: (Bicicleta,String) -> [Char]
-showBicicleta (bicicleta,pUbicacion)=
+showBicicleta :: (Bicicleta,String,Integer) -> [Char]
+showBicicleta (bicicleta,pUbicacion,hayBicicletas)=
     let 
         id = getIdBicicleta(bicicleta)
         tipo =  getTipoBicicleta(bicicleta)
         parqueo = getParqueoBicicleta(bicicleta)
     in
-        if pUbicacion =="#" ||pUbicacion == parqueo then
+        if pUbicacion =="#" ||pUbicacion == parqueo then do
             "\nIdentificador: " ++ show id ++ "\ttipo: " ++ show tipo ++ "\tParqueo: " ++ show parqueo
         else ""
 
-showBicicletas :: ([Bicicleta],String) -> IO()
-showBicicletas ([],pUbicacion) = putStrLn("")
-showBicicletas (lista ,pUbicacion) = do
-    let primero  = head lista
-    putStr(showBicicleta (primero, pUbicacion))
-    showBicicletas(tail lista, pUbicacion)
+showBicicletas :: ([Bicicleta],String,Integer) -> IO()
+showBicicletas ([],pUbicacion,hayBici) = do
+    if hayBici == 0 then
+        putStrLn("\n\n\n---No existen bicicletas en esta ubicación---\n\n\n")
+    else
+        putStrLn "\n"
 
+showBicicletas (lista ,pUbicacion, hayBici) = do
+    let primero  = head lista
+    let id = getIdBicicleta(primero)
+    let tipo =  getTipoBicicleta(primero)
+    let parqueo = getParqueoBicicleta(primero)
+    if pUbicacion =="#" || pUbicacion == parqueo then do 
+        putStr("\nIdentificador: " ++ show id ++ "\t\ttipo: " ++ show tipo ++ "\tParqueo: " ++ show parqueo)
+        showBicicletas(tail lista, pUbicacion,1)
+    else do 
+        putStr ""
+        showBicicletas(tail lista, pUbicacion,hayBici)
+              
+
+consultarBicicletas (lParqueos,lBicicletas) = do
+    putStrLn "Indique x: "
+    pX<- getLine
+    putStrLn "Indique y: "
+    pY<- getLine
+    parqueo <- getParqueoCercano (read (pX) ::Float, read (pY) ::Float, lParqueos, (head lParqueos))
+    putStrLn ("\n\n\n#################### Bicicletas ####################")    
+    showBicicletas(lBicicletas,parqueo,0)
+    putStrLn"\n--------------------------------------------------\n"
 
 getBicicletasParqueo (lBicicletas, nombreParqueo) = do
     if lBicicletas == [] then 
@@ -621,14 +685,18 @@ getDistanciaBiciAux (idBici, lFacturas) = do
             getDistanciaBiciAux(idBici, tail lFacturas)
 
 mostrarBicicletas lBicicletas= do
-    putStrLn "Ingrese el nombre del parqueo que desea consultar \
-    \\n# Para consultar todas las bicicletas\
-    \\no transito para consultar las bicicletas en transito\nOpción: "
+    putStrLn "\n-Ingrese el nombre del parqueo que desea consultar \
+    \ \n-'#' Para consultar todas las bicicletas\
+    \ \n-o 'transito' para consultar las bicicletas en tránsito\
+    \ \nOpción: "
     parqueo <- getLine
-    if parqueo == "transito" then
-        showBicicletas (lBicicletas,"en transito")
-    else
-        showBicicletas (lBicicletas,parqueo)
+    putStrLn ("\n\n\n#################### Bicicletas ####################")
+    if parqueo == "transito" then do
+        showBicicletas (lBicicletas,"en transito",0)
+        putStrLn"\n--------------------------------------------------\n\n\n"    
+    else do
+        showBicicletas (lBicicletas,parqueo,0)
+        putStrLn"\n--------------------------------------------------\n\n\n"    
 ------------------------------------------------------------------------------------------------
 --
 --
@@ -667,7 +735,7 @@ showUsuarios lista =
         showUsuarios(tail lista)
 
 seleccionarUsuario lUsuarios = do
-    putStrLn "Ingrese la cedula del usuario o (#) para cancelar el alquiler"
+    putStrLn "Ingrese la cedula del usuario o (#) para cancelar el alquiler: "
     cedulaUsuario <- getLine
     if cedulaUsuario == "#" then 
         return cedulaUsuario
@@ -796,21 +864,27 @@ imprimirListaTop (lista,arg1,arg2) = do
         putStrLn (arg1++": " ++ head primero ++"\t"++ arg2++": " ++last primero)
         imprimirListaTop (tail lista,arg1,arg2)
 
---elimViajesRepetidos (lViajesUsuario) = do
---    if length lViajesUsuario == 0 then
---        []
---    else do
---        let primero = head lViajesUsuario
---        let usuario = head primero
---        let nuevaLista = filter(\x ->(head x) /= usuario) lViajesUsuario
---        [primero] ++ elimViajesRepetidos(nuevaLista)
 
---
+resumen(lFacturas) = do
+    resumenAux(lFacturas, 0,0,0)
+
+resumenAux(lFacturas, totalViajes, totalKm, totalFact) = do
+    if lFacturas == [] then do
+        putStrLn("Cantidad viajes terminados: " ++ show totalViajes ++ "\
+                \ \nTotal de kilometros: " ++ show totalKm ++ "\
+                \ \nTotal facturado: " ++ show totalFact)
+    else do
+        let factura = head lFacturas
+        let cantKmFact = getCantKM(factura)
+        let total = getTotalFactura(factura)
+        resumenAux(tail lFacturas, totalViajes+1, totalKm+cantKmFact , totalFact+total)
+
+
 salir = do
     putStrLn ("Saliendo del sistema")
     exitSuccess
 
-    
+
 ------------------------------------------------------------------------------------------------
 --
 --
