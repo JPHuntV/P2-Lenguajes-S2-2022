@@ -43,20 +43,21 @@ menuOperativo (opcion, lParqueos, lBicicletas, lUsuarios) =
         print ("volviendo")
     else
         do
+            parqueos <-cargarParqueos lParqueos
+            usuarios <- cargarUsuarios lUsuarios
             case opcion of
                 -1-> putStrLn ("")
                 1-> do
-                    parqueos <-cargarParqueos lParqueos
                     showParqueos parqueos
                 2-> do
                     mostrarBicicletas lBicicletas
                     
                 3-> do
-                    usuarios <- cargarUsuarios lUsuarios
+                    
                     putStrLn("Se han cargado los siguiente usuarios")
                     showUsuarios usuarios
                 4-> do
-                    menuEstadisticas(-1, lParqueos, lBicicletas, lUsuarios)
+                    menuEstadisticas(-1, parqueos, lBicicletas, usuarios)
 
             putStr("\nMenú operativo")
             putStr("\n1. Mostrar parqueos")
@@ -122,10 +123,10 @@ menuEstadisticas (opcion, lParqueos, lBicicletas, lUsuarios) =
                 -1-> putStrLn ("")
                 1-> do
                     putStrLn("top 5 usuarios")
-                    getTop5Usuarios lFacturas
+                    getTop5Usuarios (lFacturas, lUsuarios)
                 2-> do
                     putStrLn("top 5 parqueos")
-                   -- getTop5Parqueos lFacturas
+                    getTop5Parqueos (lFacturas,lParqueos)
                 3-> do
                     putStrLn("top 3 bicicletas")
                 4-> putStrLn("resumen")
@@ -141,24 +142,64 @@ menuEstadisticas (opcion, lParqueos, lBicicletas, lUsuarios) =
             let opcion = (read tempOpcion :: Integer)
             menuEstadisticas (opcion, lParqueos, lBicicletas, lUsuarios)
 
+
+
+
 --------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------------------------
-getTop5Usuarios lFacturas= do
+getTop5Parqueos (lFacturas, lParqueos)= do
+    let lViajesParqueo = getViajesXParqueo(lFacturas, lParqueos)
+    let ordenada = sortBy(\x1 x2 -> compare (last x2) (last x1)) lViajesParqueo --https://stackoverflow.com/questions/19587518/ordering-a-list-of-lists-in-haskell
+    let top5 = take 5 ordenada
+    imprimirListaTop (top5)
+
+getViajesXParqueo (lFacturas, lParqueos) = do
+    if lParqueos == [] then
+        []
+    else do
+        let elemento = head lParqueos
+        let nombreParqueo = getNombreParqueo(elemento)
+        let cantViajes = getViajesXParqueoAux(nombreParqueo, lFacturas)
+        [[nombreParqueo]++[show cantViajes]] ++ getViajesXParqueo(lFacturas, tail lParqueos)
+        
+
+
+
+getViajesXParqueoAux (nombreParqueo, lFacturas) = do
+    if lFacturas == [] then
+        0
+    else do
+        let elemento = head lFacturas
+        let salidaTemp = getPSalidaFact(elemento)
+        let llegadaTemp = getPLlegadaFact(elemento)
+        if nombreParqueo == salidaTemp || nombreParqueo == llegadaTemp then
+            1 + getViajesXParqueoAux(nombreParqueo, tail lFacturas)
+        else
+            getViajesXParqueoAux(nombreParqueo, tail lFacturas)
+
+
+
+
+
+
+
+------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
+getTop5Usuarios (lFacturas,lUsuarios)= do
     
-    let lViajesUsuario = elimViajesRepetidos(getViajesXUsuario(lFacturas))
+    let lViajesUsuario = getViajesXUsuario(lFacturas, lUsuarios)
     let ordenada = sortBy(\x1 x2 -> compare (last x2) (last x1)) lViajesUsuario --https://stackoverflow.com/questions/19587518/ordering-a-list-of-lists-in-haskell
     let top5 = take 5 ordenada
     imprimirListaTop (top5)
 
-getViajesXUsuario lFacturas = do
-    if lFacturas == [] then
+getViajesXUsuario (lFacturas, lUsuarios) = do
+    if lUsuarios == [] then
         []
     else do
-        let elemento = head lFacturas
-        let usuario = getUsuarioFactura(elemento)
+        let elemento = head lUsuarios
+        let usuario = getCedulaUsuario(elemento)
         let cantViajes = getViajesXUsuarioAux(usuario, lFacturas)
-        --putStrLn ("usuario: " ++ show usuario ++ " cantidad: " ++ show cantViajes)
-        [[show usuario]++[show cantViajes]] ++ getViajesXUsuario(tail lFacturas)
+        [[show usuario]++[show cantViajes]] ++ getViajesXUsuario(lFacturas, tail lUsuarios)
         
 
 
