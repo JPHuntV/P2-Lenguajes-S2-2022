@@ -362,11 +362,11 @@ seleccionarParqueoL (lParqueos, pSalida)  = do
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: existeParqueo
+E: lParqueos ->lista de parqueos, nombre -> nombre de un parqueo
+S: True si el parqueo existe , False si no
+R: ninguna
+O: Verifica si un parqueo existe 
 ----------------------------------------}
 
 existeParqueo ([], nombre) = False
@@ -380,11 +380,11 @@ existeParqueo (lParqueos, nombre)= do
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: getParqueoXNombre
+E:nombre -> una cadena de texto, lParqueos ->lista parqueos
+S: estructura Parqueo con el nombre indicado
+R: El nombre debe ser identico , sensible a mayusculas
+O: Busca el parqueo en la lista y retorna la estructura
 ----------------------------------------}
 
 getParqueoXNombre(nombre, lParqueos) = do
@@ -397,11 +397,11 @@ getParqueoXNombre(nombre, lParqueos) = do
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: getTop5Parqueos
+E: lFacturas -> lista de facturas, lParqueos->lista de parqueos
+S: Imprime en consola el top de parqueos
+R: las listas deben de ser tipo Factura y Parqueo respectivamente
+O: Imprime el top 5 de parqueos con más viajes terminados (salida + llegada)
 ----------------------------------------}
 
 getTop5Parqueos (lFacturas, lParqueos)= do
@@ -412,11 +412,11 @@ getTop5Parqueos (lFacturas, lParqueos)= do
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: getViajesXParqueo
+E: lFacturas -> Lista de facturas , lParqueos ->lista de parqueos
+S: Una lista de listas con la estructura [parqueo, cantidad de viajes]
+R: las listas deben ser de tipo Factura y Parqueo correspondientemente
+O: Indica la cantidad de viajes por parqueo (salida + llegada)
 ----------------------------------------}
 
 getViajesXParqueo (lFacturas, lParqueos) = do
@@ -430,11 +430,11 @@ getViajesXParqueo (lFacturas, lParqueos) = do
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: getViajesXParqueoAux
+E: nombreParqueo-> nombre del parqueo , lFacturas ->lista de facturas
+S: cantidad de viajes de cada parqueo
+R: lFacturas debe ser tipo lista Factura
+O: Indica la cantidad de viajes finalizados por un parqueo
 ----------------------------------------}
 
 getViajesXParqueoAux (nombreParqueo, lFacturas) = do
@@ -458,11 +458,12 @@ getViajesXParqueoAux (nombreParqueo, lFacturas) = do
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: cargarAlquileres
+E: Ruta del archivo que contiene la tabla Alquileres
+S: Una lista de estructuras Alquiler
+R: El archivo debe tener el formato correcto
+O: Recibe una ruta de un archivo y crea una lista de Alquileres con la información de dicho archivo
+Nota: Se utilizó el metodo de carga visto en clase
 ----------------------------------------}
 
 cargarAlquileres :: FilePath-> IO [Alquiler] 
@@ -474,11 +475,12 @@ cargarAlquileres archivo = do
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: separarAlquileres
+E: Lista de las lineas de un archivo 
+S: Una lista de Alquileres
+R: La linea debe tener el formato correcto 
+O: Recibe una lista de lineas de texto, la divide por comas y crea un Alquiler
+Nota: Se utilizó el metodo de separación visto en clase
 ----------------------------------------}
 
 separarAlquileres :: [[Char]]  -> [Alquiler]        
@@ -490,11 +492,13 @@ separarAlquileres (lista) =
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: alquilar
+E: (lParqueos, lBicicletas, lUsuario) -> listas de dichas estructuras correspondientemente
+S: crea un nuevo alquiler, modifica  la ubicación de una bicicleta
+R: los valores ingresados por consola deben ser validos
+O: Muestra al usuario una serie de tablas para que seleccione distintos valores y pueda alquilar una
+    bicicleta, al finalizar la solicitud crea una estructura alquiler, la guarda en un txt y modifica el 
+    estado de la bicicleta activada
 ----------------------------------------}
 
 alquilar(lParqueos, lBicicletas, lUsuarios) = do
@@ -528,10 +532,13 @@ alquilar(lParqueos, lBicicletas, lUsuarios) = do
                 else do
                     lAlquileres <- cargarAlquileres "alquileres.txt"
                     let cantAlquileres = length lAlquileres
+                    -- escritura del alquiler al archivo alquileres.txt
                     appendFile "alquileres.txt" (show cantAlquileres ++","++usuario++",\
                                                 \"++parqueoSalida++","++parqueoLlegada++",\
                                                 \"++bicicleta++",activo\n")
-                    bicicletaUbicacion(lBicicletas,bicicleta,"en transito")                            
+                    bicicletaUbicacion(lBicicletas,bicicleta,"en transito") 
+
+                    --impresión en consola de la información del alquiler                           
                     putStrLn( "\n\n¡Se ha generado el alguiler!\
                                 \ \n\n----------------------------------------\
                                 \ \nCodigo: " ++ show cantAlquileres ++"\ 
@@ -543,11 +550,11 @@ alquilar(lParqueos, lBicicletas, lUsuarios) = do
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: getAlquiler
+E: idAlquiler -> identificador de un posible alquiler, lAlquileres ->lista de alquileres
+S: estructura del Alquiler que coincide con el identificador indicado
+R: idAlquiler debe ser tipo numerico
+O: Busca un alquiler que coincida con el identificador indicado y retorna su estructura
 ----------------------------------------}
 
 getAlquiler(idAlquiler, lAlquileres) = do
@@ -582,11 +589,11 @@ seleccionarAlquiler lAlquileres = do
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: existeAlquiler
+E: lAlquileres ->lista de alquileres, alquiler -> codigo de un alquiler, estado->estado de un alquiler
+S: True si el alquiler existe , False si no
+R: ninguna
+O: Verifica si un alquiler existe y está activo 
 ----------------------------------------}
 
 existeAlquiler ([], alquiler, estado) = False
@@ -604,11 +611,11 @@ existeAlquiler(lAlquileres, alquiler, estado)= do
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: facturarAlquiler
+E: lAlquileres -> lista de alquileres, alquiler -> identificador del alquiler a facturar, estado->"facturado"
+S: reseteo de alquileres.txt y llamada a su función auxiliar
+R: ninguna
+O: Deja en blanco el archivo de alquileres y llama a su función auxiliar para que sobreescriba los datos
 ----------------------------------------}
 
 facturarAlquiler(lAlquileres,alquiler, estado) = do
@@ -617,11 +624,11 @@ facturarAlquiler(lAlquileres,alquiler, estado) = do
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: facturarAlquilerAux
+E: lAlquileres -> lista de alquileres, alquiler -> identificador del alquiler a facturar, estado->"facturado"
+S: Escritura de los alquileres a un archivo de texto
+R: ninguna
+O: sobreescritura del archivo de alquileres, registra un alquiler como facturado
 ----------------------------------------}
 
 facturarAlquilerAux(lAlquileres, alquiler, estado) = do
@@ -644,11 +651,11 @@ facturarAlquilerAux(lAlquileres, alquiler, estado) = do
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: showAlquilerActivo
+E: lista -> lista de alquileres
+S: imprime en consola alquileres activos
+R: lista debe ser de tipo Alquiler
+O: Recibe una lista de alquileres e imprime en consola aquellos que se encuentren activos
 ----------------------------------------}
 
 showAlquilerActivo :: [Alquiler] -> IO()
@@ -680,11 +687,12 @@ showAlquilerActivo lista = do
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: cargarFacturas
+E: Ruta del archivo que contiene la tabla Facturas
+S: Una lista de estructuras Factura
+R: El archivo debe tener el formato correcto
+O: Recibe una ruta de un archivo y crea una lista de Facturas con la información de dicho archivo
+Nota: Se utilizó el metodo de carga visto en clase
 ----------------------------------------}
 
 cargarFacturas :: FilePath-> IO [Factura] 
@@ -696,11 +704,12 @@ cargarFacturas archivo = do
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: separaFacturas
+E: Lista de las lineas de un archivo 
+S: Una lista de Facturas
+R: La linea debe tener el formato correcto 
+O: Recibe una lista de lineas de texto, la divide por comas y crea una factura
+Nota: Se utilizó el metodo de separación visto en clase
 ----------------------------------------}
 
 separarFacturas :: [[Char]]  -> [Factura]        
@@ -712,11 +721,13 @@ separarFacturas (lista) =
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: facturar
+E: bicicletas -> lista de bicicletas, lParqueos ->lista de parqueos
+S: facturación de un alquiler
+R: El alquiler debe estar activo
+O: Solicita el codigo de una alquiler y lo factura, es decir, cambia el estado del alquiler a "facturado"
+    además de cambiar la ubicación de la bicicleta de "en transito" al parqueo de llegada
+    Esta factura se añade al archivo facturas.txt
 ----------------------------------------}
 
 facturar(bicicletas,lParqueos) = do
@@ -740,7 +751,7 @@ facturar(bicicletas,lParqueos) = do
 
         let factura = crearFactura([show cantFacturas,show(getCedulaAlquiler(alquilerInfo)), pSalida, pLlegada,idBicicleta, tipoBicicleta, show distaciaRecorrida,show tarifaKm, show (distaciaRecorrida * tarifaKm)])
         appendFile "facturas.txt" (show (getCodigoFactura(factura))++","++show(getUsuarioFactura(factura))++","++getPSalidaFact(factura)++","++getPLlegadaFact(factura)++","++getBiciFactura(factura)++","++getTipoBiciFactura(factura)++","++show(getCantKM(factura))++","++show(getTarifaKMFactura(factura))++","++show(getTotalFactura(factura))++"\n")
-        bicicletaUbicacion(bicicletas, idBicicleta, pLlegada)
+        bicicletaUbicacion(bicicletas, idBicicleta, pLlegada) -- libera la bicicleta
         facturarAlquiler(listaAlquileres, getCodigoAlquiler(alquilerInfo), "facturado")
         putStrLn("\n¡El alquiler " ++ alquilerTemp ++ " ha sido facturado!")
         putStrLn ("\nSe ha generado la siguiente factura")
@@ -748,11 +759,11 @@ facturar(bicicletas,lParqueos) = do
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: printFactura
+E: factura -> una estructura de tipo Factura
+S: Imprime en consola la información de la factura
+R: factura debe ser de tipo Factura
+O: Imprime la información de una factura en consola
 ----------------------------------------}
 
 printFactura(factura) = do
@@ -812,11 +823,12 @@ resumenAux(lFacturas, totalViajes, totalKm, totalFact) = do
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: cargarBicicletas
+E: Ruta del archivo que contiene la tabla Bicicletas
+S: Una lista de estructuras Bicicleta
+R: El archivo debe tener el formato correcto
+O: Recibe una ruta de un archivo y crea una lista de Bicicletas con la información de dicho archivo
+Nota: Se utilizó el metodo de carga visto en clase
 ----------------------------------------}
 
 cargarBicicletas :: FilePath-> IO [Bicicleta] 
@@ -828,20 +840,12 @@ cargarBicicletas archivo = do
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
-----------------------------------------}
-
-
-{----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: separaBicicletas
+E: Lista de las lineas de un archivo 
+S: Una lista de Bicicletas
+R: La linea debe tener el formato correcto 
+O: Recibe una lista de lineas de texto, la divide por comas y crea una bicicleta
+Nota: Se utilizó el metodo de separación visto en clase
 ----------------------------------------}
 
 separaBicicletas :: [[Char]]  -> [Bicicleta]        
@@ -852,32 +856,14 @@ separaBicicletas (lista) =
         [crearBicicleta(separarPorComas((head lista), ""))] ++ separaBicicletas (tail lista)
 
 
-{----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
-----------------------------------------}
-
-showBicicleta :: (Bicicleta,String,Integer) -> [Char]
-showBicicleta (bicicleta,pUbicacion,hayBicicletas)=
-    let 
-        id = getIdBicicleta(bicicleta)
-        tipo =  getTipoBicicleta(bicicleta)
-        parqueo = getParqueoBicicleta(bicicleta)
-    in
-        if pUbicacion =="#" ||pUbicacion == parqueo then do
-            "\nIdentificador: " ++ show id ++ "\ttipo: " ++ show tipo ++ "\tParqueo: " ++ show parqueo
-        else ""
-
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: showBicicletas
+E: lista -> lista de bicicletas, pUbicación->parqueo de las que se quieren imprimir las bicicletas
+    hayBici ->0 si no se ha imprimido ninguna bicicleta 1 si se imprimió alguna
+S: Imprime la información de las bicicletas en el parqueo indicado
+R: lista debe ser tipo Bicicleta, pUbicacion una cadena de texto y hay bici debe ser 0 iniciarlmente
+O: Imprime la información de las bicicletas en una ubicación especifica
 ----------------------------------------}
 
 showBicicletas :: ([Bicicleta],String,Integer) -> IO()
@@ -886,16 +872,6 @@ showBicicletas ([],pUbicacion,hayBici) = do
         putStrLn("\n\n\n---No existen bicicletas en esta ubicación---\n\n\n")
     else
         putStrLn "\n"
-
-
-{----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
-----------------------------------------}
-
 showBicicletas (lista ,pUbicacion, hayBici) = do
     let primero  = head lista
     let id = getIdBicicleta(primero)
@@ -910,11 +886,12 @@ showBicicletas (lista ,pUbicacion, hayBici) = do
               
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: consultarBicicletas
+E: lParqueos -> lista de parqueos, lBicicletas -> lista de bicicletas
+S: Impresión en consola del parqueo más cercano y sus bicicletas
+R: lParqueos y lBicicletas deben de ser de tipo Parqueo y  Bicicleta correspondientemente
+O: Solicita al usuario un punto (x,y), calcula el parqueo más cercano a ese punto, imprime su informacion
+    y sus bicicletas
 ----------------------------------------}
 
 consultarBicicletas (lParqueos,lBicicletas) = do
@@ -929,11 +906,11 @@ consultarBicicletas (lParqueos,lBicicletas) = do
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: getBicicletasParqueo
+E: lBicicletas ->lista de bicicletas, nombreParqueo -> nombre del parqueo a consultar
+S: lista de bicicletas en ese parqueo
+R: nombreParqueo debe ser exacto, sensible a mayusculas
+O: Crea una lista con todas las bicicletas en un parqueo indicado
 ----------------------------------------}
 
 getBicicletasParqueo (lBicicletas, nombreParqueo) = do
@@ -969,11 +946,11 @@ seleccionarBicicleta lBicicletas = do
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: existeBicicleta
+E: lBicicletas ->lista de bicicletas, idBicicleta -> id de una bicicleta
+S: True si la bicicleta existe , False si no
+R: ninguna
+O: Verifica si una bicicleta existe 
 ----------------------------------------}
 
 existeBicicleta ([], idBicicleta) = False
@@ -987,11 +964,11 @@ existeBicicleta (lBicicletas, idBicicleta)= do
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: bicicletaUbicacion
+E: lBicicletas ->lista de bicicletas, bicicleta -> id de una bicicleta, ubicación->nombre del parqueo a reubicar la bicicleta
+S: Limpia el archivo de bicicletas y lo sobreescribe (llamada a su función auxiliar)
+R: debe existir una bicicleta con el identificador dado y un parqueo con la ubicación dada
+O: Actualizar los datos del archivo bicicleta (cambiar el estado en base de datos de una bicicleta)
 ----------------------------------------}
 
 bicicletaUbicacion(lBicicletas,bicicleta, ubicacion)= do
@@ -1000,11 +977,11 @@ bicicletaUbicacion(lBicicletas,bicicleta, ubicacion)= do
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: bicicletaUbicacionAux
+E:lBicicletas ->lista de bicicletas, bicicleta -> id de una bicicleta, ubicación->nombre del parqueo a reubicar la bicicleta
+S: Sobreescribe el archivo bicicletas.txt con los datos actualizados
+R: debe existir una bicicleta con el identificador dado y un parqueo con la ubicación dada
+O: Cambia la ubicación de una bicicleta
 ----------------------------------------}
 
 bicicletaUbicacionAux(lBicicletas, bicicleta, ubicacion) = do
@@ -1024,11 +1001,11 @@ bicicletaUbicacionAux(lBicicletas, bicicleta, ubicacion) = do
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: getTipoBicicleta2
+E: idBicicleta -> identificador de una bicicleta, bicicletas->lista de bicicletas
+S: tipo de la bicicleta con el identificador indicado
+R: debe existir una bicicleta con el identificador indicado
+O: Obtener el tipo de una bicicleta
 ----------------------------------------}
 
 getTipoBicicleta2(idBicicleta, bicicletas) = do
@@ -1042,11 +1019,11 @@ getTipoBicicleta2(idBicicleta, bicicletas) = do
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: getTop3Bicicletas
+E: lFacturas -> lista de facturas , lBicicletas -> lista de bicicletas
+S: imprime el top 3 de bicicletas en consolq
+R: lfacturas debe ser tipo Factura y lBicicletas debe ser tipo Bicicleta
+O: Obtiene el top 3 de bicicletas con más distancia recorrida
 ----------------------------------------}
 
 getTop3Bicicletas (lFacturas, lBicicletas)= do
@@ -1057,11 +1034,11 @@ getTop3Bicicletas (lFacturas, lBicicletas)= do
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: getDistanciaBici
+E: lFacturas -> lista de facturas, lBicicletas->lista de bicicletas
+S: lista de listas con la siguiente estructura [ idBicicleta, distancia recorrida]
+R: lfacturas debe ser tipo Factura y lBicicletas debe ser tipo Bicicleta
+O: Recorre la lista de facturas y crea una lista de listas con el id de la bicicleta y la distancia que esta ha recorrido
 ----------------------------------------}
 
 getDistanciaBici (lFacturas, lBicicletas) = do
@@ -1075,11 +1052,11 @@ getDistanciaBici (lFacturas, lBicicletas) = do
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: getDistanciaBiciAux
+E: idBici -> id de una bicicleta , lFacturas -> lista de facturas
+S: distancia reccorida por la bicicleta con ese id
+R: debe existir una bicicleta con el id indicado
+O: Calcula la distancia recorrida por cada una de las bicicletas
 ----------------------------------------}
 
 getDistanciaBiciAux (idBici, lFacturas) = do
@@ -1096,11 +1073,11 @@ getDistanciaBiciAux (idBici, lFacturas) = do
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: mostrarBicicletas
+E: lBicicletas -> lista de bicicletas parque-> parqueo donde se buscaran las bicicletas
+S: bicicletas en un parqueo especifico
+R: el nombre del parqueo debe ser exacto, sensible a mayusculas
+O: Imprimir todas la bicicletas en una ubicación especifica
 ----------------------------------------}
 
 mostrarBicicletas lBicicletas= do
@@ -1125,11 +1102,12 @@ mostrarBicicletas lBicicletas= do
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: cargarUsuarios
+E: Ruta del archivo que contiene la tabla Usuarios
+S: Una lista de estructuras Usuario
+R: El archivo debe tener el formato correcto
+O: Recibe una ruta de un archivo y crea una lista de Usuarios con la información de dicho archivo
+Nota: Se utilizó el metodo de carga visto en clase
 ----------------------------------------}
 
 cargarUsuarios :: FilePath-> IO [Usuario] 
@@ -1140,11 +1118,12 @@ cargarUsuarios archivo = do
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: separaUsuarios
+E: Lista de las lineas de un archivo 
+S: Una lista de Usuarios
+R: La linea debe tener el formato correcto 
+O: Recibe una lista de lineas de texto, la divide por comas y crea un usuario
+Nota: Se utilizó el metodo de separación visto en clase
 ----------------------------------------}
 
 separaUsuarios :: [[Char]]  -> [Usuario]        
@@ -1156,11 +1135,12 @@ separaUsuarios (lista) =
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: showUsuario
+E: usuario -> Un usuario
+S: String con la información del usuario en formato para imprimir
+R: Debe recibir un usuario
+O: Recibe un usuario y retorna una cadena de texto con su información
+Nota: Se utilizo el metodo de impresión de estructuras visto en clase
 ----------------------------------------}
 
 showUsuario :: Usuario -> [Char]
@@ -1173,11 +1153,12 @@ showUsuario usuario=
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: showUsuarios
+E: lista -> una lista de tipo usuario
+S: Imprime la información de los usuarios en la lista
+R: Debe recibir una lista tipo Usuario
+O: Imprime la información de los usuarios
+Nota: Se utilizo el metodo de impresión de estructuras visto en clase
 ----------------------------------------}
 
 showUsuarios :: [Usuario] -> IO()
@@ -1210,11 +1191,11 @@ seleccionarUsuario lUsuarios = do
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: existePersona
+E: lUsuarios ->lista de usuarios, cedula -> cedula de un usuario
+S: True si el usuario existe , False si no
+R: ninguna
+O: Verifica si un usuario existe 
 ----------------------------------------}
 
 existePersona ([], cedula) = False
@@ -1228,11 +1209,11 @@ existePersona (lUsuarios, cedula)= do
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: getTop5Usuarios
+E: lUsuarios -> Lista de usuarios , lFacturas ->lista de facturas
+S: Impresión del top de usuarios con más viajes
+R: las listas deben ser de tipo Factura y Usuario correspondientemente
+O: Imprime el top 5 de usuarios con más viajes
 ----------------------------------------}
 
 getTop5Usuarios (lFacturas,lUsuarios)= do
@@ -1244,11 +1225,11 @@ getTop5Usuarios (lFacturas,lUsuarios)= do
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: getViajesXUsuario
+E: lUsuarios -> Lista de usuarios , lFacturas ->lista de facturas
+S: Una lista de listas con la estructura [usuario, cantidad de viajes]
+R: las listas deben ser de tipo Factura y Usuario correspondientemente
+O: Indica la cantidad de viajes realizados por cada usuario
 ----------------------------------------}
 
 getViajesXUsuario (lFacturas, lUsuarios) = do
@@ -1262,11 +1243,11 @@ getViajesXUsuario (lFacturas, lUsuarios) = do
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: getViajesXUsuarioAux
+E: usuario -> cedula de un usuario , lFacturas ->lista de facturas
+S: cantidad de viajes de dicho usuario
+R: lFacturas debe ser tipo lista Factura
+O: Indica la cantidad de viajes finalizados por un usuario
 ----------------------------------------}
 
 getViajesXUsuarioAux (usuario, lFacturas) = do
@@ -1288,11 +1269,11 @@ getViajesXUsuarioAux (usuario, lFacturas) = do
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: toLines
+E:texto -> cadena de texto
+S: lista de cadenas de texto
+R: texto debe ser de tipo string
+O: Recibe una cadena de texto la divide en cada salto de linea y crea una lista con cada subcadena
 ----------------------------------------}
 
 toLines :: String -> [String]
@@ -1301,11 +1282,11 @@ toLines texto = lines texto
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: separarPorComas
+E: cadena -> una cadena de texto, temp->tomará el valor despues de la coma
+S: una lista de strings
+R: los argumentos deben ser de tipo string
+O: Recibe una cadena de texto la separa en cada "," y retorna una lista de cada subcadena
 ----------------------------------------}
 
 separarPorComas :: ([Char], [Char]) -> [[Char]]
@@ -1318,11 +1299,11 @@ separarPorComas (cadena, temp) =
 
 
 {----------------------------------------
-Nombre: 
-E:
-S:
-R:
-O:
+Nombre: getInput
+E: Cadena de texto ingresada por consola
+S: la cadena de texto ingresada
+R: no puede ser una cadena vacia
+O: Solicita una cadena de texto y la retorna si esta no está vacia
 ----------------------------------------}
 
 getInput = do
