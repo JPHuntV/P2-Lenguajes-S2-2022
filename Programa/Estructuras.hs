@@ -8,6 +8,7 @@ data Empresa = Empresa {
     tarifaKmElectricoEmpresa::Float
 }deriving(Eq);
 
+-- Constructor de Empresa
 crearEmpresa(elemento) = Empresa (elemento!!0) (elemento!!1) (read (elemento!!2) :: Integer) (read(elemento!!3) :: Float) (read(elemento!!4) :: Float)
 getNombreEmpresa(Empresa nombre _ _ _ _) = nombre;
 getWebEmpresa(Empresa _ web _ _ _) = web;
@@ -24,6 +25,7 @@ data Parqueo = Parqueo {
     ubicacionYParqueo :: Float
 } deriving(Eq);
 
+-- Constructor Parqueo
 crearParqueo(elemento) = Parqueo (elemento!!0) (elemento!!1) (elemento!!2) (read(elemento!!3) :: Float) (read(elemento!!4) :: Float)
 getNombreParqueo (Parqueo nombre _ _ _ _) = nombre;
 getDireccionParqueo (Parqueo _ direccion _ _ _) = direccion;
@@ -38,6 +40,7 @@ data Bicicleta = Bicicleta {
     parqueoBicicleta::String
 }deriving(Eq);
 
+--Constructor Bicicleta
 crearBicicleta(elemento) = Bicicleta (elemento!!0) (elemento!!1) (elemento!!2)
 getIdBicicleta (Bicicleta id _ _) = id;
 getTipoBicicleta (Bicicleta _ tipo _) = tipo;
@@ -51,6 +54,7 @@ data Usuario = Usuario{
     nombreUsuario::String
 }deriving(Eq);
 
+--Constructor Usuario
 crearUsuario(elemento) = Usuario (read(elemento!!0) :: Integer) (elemento!!1)
 getCedulaUsuario(Usuario ced _) = ced;
 getNombreUsuario (Usuario _ nombre) = nombre;
@@ -66,6 +70,7 @@ data Alquiler = Alquiler {
     estadoAlquiler::String
 }deriving(Eq);
 
+-- Constructor Alquiler
 crearAlquiler(elemento) = Alquiler (read(elemento!!0) :: Integer) (read(elemento!!1) :: Integer) (elemento!!2) (elemento!!3) (elemento!!4) (elemento!!5)
 getCodigoAlquiler(Alquiler cod _ _ _ _ _) = cod;
 getCedulaAlquiler(Alquiler _ ced _ _ _ _) = ced;
@@ -89,6 +94,7 @@ data Factura = Factura{
     total ::Float
 }deriving(Eq);
 
+--Constructor Factura
 crearFactura(elemento) = Factura (read(elemento!!0) :: Integer) (read(elemento!!1) :: Integer) (elemento!!2) (elemento!!3) (elemento!!4) (elemento!!5) (read(elemento!!6) :: Float) (read(elemento!!7) :: Float) (read(elemento!!8) :: Float)
 getCodigoFactura (Factura cod _ _ _ _ _ _ _ _) = cod;
 getUsuarioFactura (Factura _ usuario _ _ _ _ _ _ _) = usuario;
